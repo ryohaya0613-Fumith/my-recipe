@@ -4,40 +4,7 @@
     <meta charset="UTF-8">
     <title>レシピ帳</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; position: relative; } /* position追加 */
-        
-        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e67e22; padding-bottom: 10px; margin-bottom: 20px; }
-        h1 { margin: 0; color: #e67e22; font-size: 24px; }
-        .nav-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
-        #form-view, #edit-view { display: none; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .save-btn { background: #e67e22; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-
-        .recipe-list { display: grid; gap: 10px; }
-        .recipe-item { background: white; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; }
-        .delete-btn { position: absolute; right: 10px; top: 15px; background: #eee; color: #999; border: none; border-radius: 3px; cursor: pointer; padding: 2px 5px; }
-
-        /* 詳細画面のスタイル調整 */
-        #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; }
-        .back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
-        
-        /* 編集ボタンを右上に絶対配置 */
-        .edit-btn { 
-            position: absolute; 
-            top: 20px; 
-            right: 20px; 
-            background: #3498db; 
-            color: white; 
-            border: none; 
-            padding: 8px 15px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 14px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -47,130 +14,71 @@
         <button class="nav-btn" onclick="toggleForm()">新規追加</button>
     </div>
 
-    <div id="form-view">
-        <h3>新しいレシピ</h3>
-        <input type="text" id="input-title" placeholder="料理名">
-        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切ってね）" rows="3"></textarea>
-        <textarea id="input-steps" placeholder="作り方" rows="5"></textarea>
-        <button class="save-btn" onclick="addRecipe()">保存して閉じる</button>
-        <button style="background:none; border:none; color:#999; width:100%; margin-top:10px; cursor:pointer;" onclick="toggleForm()">キャンセル</button>
+    <div id="filter-section" class="filter-area">
+        <select id="filter-meat" onchange="renderList()">
+            <option value="">すべての肉</option>
+            <option value="豚">豚</option>
+            <option value="鶏">鶏</option>
+            <option value="牛">牛</option>
+            <option value="その他">その他</option>
+        </select>
+        <select id="filter-tier" onchange="renderList()">
+            <option value="">すべてのTier</option>
+            <option value="1">Tier 1 (超簡単)</option>
+            <option value="2">Tier 2 (ふつう)</option>
+            <option value="3">Tier 3 (こだわり)</option>
+        </select>
     </div>
 
-    <div id="edit-view">
-        <h3>レシピを編集</h3>
-        <input type="hidden" id="edit-id">
-        <input type="text" id="edit-title">
-        <textarea id="edit-ingredients" rows="3"></textarea>
-        <textarea id="edit-steps" rows="5"></textarea>
-        <button class="save-btn" onclick="updateRecipe()">確定</button>
-        <button style="background:none; border:none; color:#999; width:100%; margin-top:10px; cursor:pointer;" onclick="closeEdit()">キャンセル</button>
+    <div id="form-view" class="card">
+        <h3 id="form-title">レシピの登録</h3>
+        <input type="hidden" id="entry-id">
+        <input type="text" id="input-title" placeholder="料理名">
+        
+        <div class="select-group">
+            <select id="input-meat">
+                <option value="その他">肉タグを選択</option>
+                <option value="豚">豚</option>
+                <option value="鶏">鶏</option>
+                <option value="牛">牛</option>
+                <option value="その他">その他</option>
+            </select>
+            <select id="input-tier">
+                <option value="2">Tierを選択</option>
+                <option value="1">Tier 1</option>
+                <option value="2">Tier 2</option>
+                <option value="3">Tier 3</option>
+            </select>
+        </div>
+
+        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切る）" rows="3"></textarea>
+        <textarea id="input-steps" placeholder="作り方" rows="5"></textarea>
+        <button class="save-btn" onclick="saveRecipe()">保存して閉じる</button>
+        <button class="cancel-btn" onclick="closeForm()">キャンセル</button>
     </div>
 
     <div id="list-view">
         <div class="recipe-list" id="recipe-list"></div>
     </div>
 
-    <div id="detail-view">
+    <div id="detail-view" class="card">
         <button class="back-btn" onclick="showList()">← 戻る</button>
-        <button class="edit-btn" onclick="openEdit()">編集</button> <h2 id="detail-title" style="margin-top: 10px;"></h2>
-        <div style="background:#fff5eb; padding:15px; border-radius:8px;">
+        <button class="edit-btn" onclick="openEdit()">編集</button>
+        
+        <h2 id="detail-title"></h2>
+        <div class="tags">
+            <span id="detail-meat-tag" class="tag"></span>
+            <span id="detail-tier-tag" class="tag"></span>
+        </div>
+        <div class="ingredients-box">
             <strong>材料</strong>
-            <ul id="detail-ingredients" style="margin-top:5px;"></ul>
+            <ul id="detail-ingredients"></ul>
         </div>
         <h3>作り方</h3>
-        <p id="detail-steps" style="white-space: pre-wrap; line-height: 1.6;"></p>
+        <p id="detail-steps"></p>
     </div>
 </div>
 
-<script>
-    // JavaScriptの中身は前回と全く同じでOK！
-    let recipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
-    let currentRecipe = null;
-
-    const views = ['list-view', 'form-view', 'edit-view', 'detail-view'];
-    function switchView(viewId) {
-        views.forEach(v => document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none');
-        document.getElementById('main-header').style.display = (viewId === 'list-view' || viewId === 'form-view') ? 'flex' : 'none';
-    }
-
-    function saveAndRender() {
-        localStorage.setItem('myRecipes', JSON.stringify(recipes));
-        renderList();
-    }
-
-    function toggleForm() {
-        const isFormVisible = document.getElementById('form-view').style.display === 'block';
-        switchView(isFormVisible ? 'list-view' : 'form-view');
-    }
-
-    function addRecipe() {
-        const title = document.getElementById('input-title').value;
-        const ingredients = document.getElementById('input-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== "");
-        const steps = document.getElementById('input-steps').value;
-        if(!title) return alert("料理名を入れてね！");
-        recipes.push({ id: Date.now(), title, ingredients, steps });
-        saveAndRender();
-        document.getElementById('input-title').value = '';
-        document.getElementById('input-ingredients').value = '';
-        document.getElementById('input-steps').value = '';
-        switchView('list-view');
-    }
-
-    function openEdit() {
-        document.getElementById('edit-id').value = currentRecipe.id;
-        document.getElementById('edit-title').value = currentRecipe.title;
-        document.getElementById('edit-ingredients').value = currentRecipe.ingredients.join('、');
-        document.getElementById('edit-steps').value = currentRecipe.steps;
-        switchView('edit-view');
-    }
-
-    function updateRecipe() {
-        const id = Number(document.getElementById('edit-id').value);
-        const recipeIndex = recipes.findIndex(r => r.id === id);
-        recipes[recipeIndex] = {
-            id: id,
-            title: document.getElementById('edit-title').value,
-            ingredients: document.getElementById('edit-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== ""),
-            steps: document.getElementById('edit-steps').value
-        };
-        saveAndRender();
-        currentRecipe = recipes[recipeIndex];
-        showDetail(currentRecipe);
-    }
-
-    function closeEdit() { showDetail(currentRecipe); }
-
-    function deleteRecipe(id, event) {
-        event.stopPropagation();
-        if(!confirm("削除するよ？")) return;
-        recipes = recipes.filter(r => r.id !== id);
-        saveAndRender();
-    }
-
-    function renderList() {
-        const recipeList = document.getElementById('recipe-list');
-        recipeList.innerHTML = recipes.length ? '' : '<p style="text-align:center; color:#999;">レシピがまだありません。</p>';
-        recipes.forEach(recipe => {
-            const div = document.createElement('div');
-            div.className = 'recipe-item';
-            div.innerHTML = `<strong>${recipe.title}</strong><button class="delete-btn" onclick="deleteRecipe(${recipe.id}, event)">×</button>`;
-            div.onclick = () => showDetail(recipe);
-            recipeList.appendChild(div);
-        });
-    }
-
-    function showDetail(recipe) {
-        currentRecipe = recipe;
-        switchView('detail-view');
-        document.getElementById('detail-title').innerText = recipe.title;
-        document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
-        document.getElementById('detail-steps').innerText = recipe.steps;
-    }
-
-    function showList() { switchView('list-view'); }
-
-    renderList();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
