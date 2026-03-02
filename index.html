@@ -16,10 +16,13 @@
 
     <div id="filter-section" class="filter-area">
         <select id="filter-meat" onchange="renderList()">
-            <option value="">すべての肉</option>
+            <option value="">すべての肉タグ</option>
             <option value="豚">豚</option>
             <option value="鶏">鶏</option>
+            <option value="ひき肉">ひき肉</option>
             <option value="牛">牛</option>
+            <option value="魚">魚</option>
+            <option value="ハム">ハム</option>
             <option value="その他">その他</option>
         </select>
         <select id="filter-tier" onchange="renderList()">
@@ -37,22 +40,27 @@
         
         <div class="select-group">
             <select id="input-meat">
-                <option value="">肉タグを選択（必須）</option>
+                <option value="">肉タグ（必須）</option>
                 <option value="豚">豚</option>
                 <option value="鶏">鶏</option>
+                <option value="ひき肉">ひき肉</option>
                 <option value="牛">牛</option>
+                <option value="魚">魚</option>
+                <option value="ハム">ハム</option>
                 <option value="その他">その他</option>
             </select>
             <select id="input-tier">
-                <option value="">Tierを選択（必須）</option>
+                <option value="">Tier（必須）</option>
                 <option value="1">Tier 1</option>
                 <option value="2">Tier 2</option>
                 <option value="3">Tier 3</option>
             </select>
         </div>
 
-        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切る）" rows="3"></textarea>
-        <textarea id="input-steps" placeholder="作り方" rows="5"></textarea>
+        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切る）" rows="2"></textarea>
+        <textarea id="input-steps" placeholder="作り方" rows="4"></textarea>
+        <textarea id="input-memo" placeholder="備考（例：シソ可、動画ありなど）" rows="2"></textarea>
+        
         <button class="save-btn" onclick="saveRecipe()">保存して閉じる</button>
         <button class="cancel-btn" onclick="closeForm()">キャンセル</button>
     </div>
@@ -70,12 +78,19 @@
             <span id="detail-meat-tag" class="tag"></span>
             <span id="detail-tier-tag" class="tag"></span>
         </div>
+
         <div class="ingredients-box">
             <strong>材料</strong>
             <ul id="detail-ingredients"></ul>
         </div>
+
         <h3>作り方</h3>
-        <p id="detail-steps"></p>
+        <p id="detail-steps" class="pre-wrap"></p>
+
+        <div id="memo-section" class="memo-box">
+            <strong>備考</strong>
+            <p id="detail-memo" class="pre-wrap"></p>
+        </div>
 
         <div style="text-align: right; margin-top: 30px;">
             <button class="delete-detail-btn" id="delete-btn-detail">レシピを削除</button>
