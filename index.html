@@ -6,27 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
+        .container { max-width: 600px; margin: auto; position: relative; } /* position追加 */
         
-        /* ヘッダー部分 */
         .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e67e22; padding-bottom: 10px; margin-bottom: 20px; }
         h1 { margin: 0; color: #e67e22; font-size: 24px; }
         .nav-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-        /* 入力エリア（最初は非表示） */
-        #form-view { display: none; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #form-view, #edit-view { display: none; background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         .save-btn { background: #e67e22; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
 
-        /* 一覧 */
         .recipe-list { display: grid; gap: 10px; }
         .recipe-item { background: white; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; }
         .delete-btn { position: absolute; right: 10px; top: 15px; background: #eee; color: #999; border: none; border-radius: 3px; cursor: pointer; padding: 2px 5px; }
-        .delete-btn:hover { background: #e74c3c; color: white; }
 
-        /* 詳細画面 */
-        #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        /* 詳細画面のスタイル調整 */
+        #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; }
         .back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+        
+        /* 編集ボタンを右上に絶対配置 */
+        .edit-btn { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -40,10 +50,20 @@
     <div id="form-view">
         <h3>新しいレシピ</h3>
         <input type="text" id="input-title" placeholder="料理名">
-        <textarea id="input-ingredients" placeholder="材料（「、」で区切ってね）" rows="3"></textarea>
+        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切ってね）" rows="3"></textarea>
         <textarea id="input-steps" placeholder="作り方" rows="5"></textarea>
         <button class="save-btn" onclick="addRecipe()">保存して閉じる</button>
         <button style="background:none; border:none; color:#999; width:100%; margin-top:10px; cursor:pointer;" onclick="toggleForm()">キャンセル</button>
+    </div>
+
+    <div id="edit-view">
+        <h3>レシピを編集</h3>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="edit-title">
+        <textarea id="edit-ingredients" rows="3"></textarea>
+        <textarea id="edit-steps" rows="5"></textarea>
+        <button class="save-btn" onclick="updateRecipe()">確定</button>
+        <button style="background:none; border:none; color:#999; width:100%; margin-top:10px; cursor:pointer;" onclick="closeEdit()">キャンセル</button>
     </div>
 
     <div id="list-view">
@@ -52,7 +72,7 @@
 
     <div id="detail-view">
         <button class="back-btn" onclick="showList()">← 戻る</button>
-        <h2 id="detail-title"></h2>
+        <button class="edit-btn" onclick="openEdit()">編集</button> <h2 id="detail-title" style="margin-top: 10px;"></h2>
         <div style="background:#fff5eb; padding:15px; border-radius:8px;">
             <strong>材料</strong>
             <ul id="detail-ingredients" style="margin-top:5px;"></ul>
@@ -63,61 +83,73 @@
 </div>
 
 <script>
+    // JavaScriptの中身は前回と全く同じでOK！
     let recipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
+    let currentRecipe = null;
 
-    const listView = document.getElementById('list-view');
-    const formView = document.getElementById('form-view');
-    const detailView = document.getElementById('detail-view');
-    const header = document.getElementById('main-header');
-    const recipeList = document.getElementById('recipe-list');
+    const views = ['list-view', 'form-view', 'edit-view', 'detail-view'];
+    function switchView(viewId) {
+        views.forEach(v => document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none');
+        document.getElementById('main-header').style.display = (viewId === 'list-view' || viewId === 'form-view') ? 'flex' : 'none';
+    }
 
-    function saveToStorage() {
+    function saveAndRender() {
         localStorage.setItem('myRecipes', JSON.stringify(recipes));
         renderList();
     }
 
-    // 入力フォームの出し入れ
     function toggleForm() {
-        if (formView.style.display === 'block') {
-            formView.style.display = 'none';
-            listView.style.display = 'block';
-        } else {
-            formView.style.display = 'block';
-            listView.style.display = 'none';
-            detailView.style.display = 'none';
-        }
+        const isFormVisible = document.getElementById('form-view').style.display === 'block';
+        switchView(isFormVisible ? 'list-view' : 'form-view');
     }
 
     function addRecipe() {
         const title = document.getElementById('input-title').value;
-        const ingredients = document.getElementById('input-ingredients').value.split(/[、\n]/); // 句読点か改行で区切る
+        const ingredients = document.getElementById('input-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== "");
         const steps = document.getElementById('input-steps').value;
-
         if(!title) return alert("料理名を入れてね！");
-
-        const newRecipe = { id: Date.now(), title, ingredients, steps };
-        recipes.push(newRecipe);
-        saveToStorage();
-
-        // リセットして閉じる
+        recipes.push({ id: Date.now(), title, ingredients, steps });
+        saveAndRender();
         document.getElementById('input-title').value = '';
         document.getElementById('input-ingredients').value = '';
         document.getElementById('input-steps').value = '';
-        toggleForm();
+        switchView('list-view');
     }
+
+    function openEdit() {
+        document.getElementById('edit-id').value = currentRecipe.id;
+        document.getElementById('edit-title').value = currentRecipe.title;
+        document.getElementById('edit-ingredients').value = currentRecipe.ingredients.join('、');
+        document.getElementById('edit-steps').value = currentRecipe.steps;
+        switchView('edit-view');
+    }
+
+    function updateRecipe() {
+        const id = Number(document.getElementById('edit-id').value);
+        const recipeIndex = recipes.findIndex(r => r.id === id);
+        recipes[recipeIndex] = {
+            id: id,
+            title: document.getElementById('edit-title').value,
+            ingredients: document.getElementById('edit-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== ""),
+            steps: document.getElementById('edit-steps').value
+        };
+        saveAndRender();
+        currentRecipe = recipes[recipeIndex];
+        showDetail(currentRecipe);
+    }
+
+    function closeEdit() { showDetail(currentRecipe); }
 
     function deleteRecipe(id, event) {
         event.stopPropagation();
         if(!confirm("削除するよ？")) return;
         recipes = recipes.filter(r => r.id !== id);
-        saveToStorage();
+        saveAndRender();
     }
 
     function renderList() {
-        recipeList.innerHTML = '';
-        if (recipes.length === 0) {
-            recipeList.innerHTML = '<p style="text-align:center; color:#999;">レシピがまだありません。「新規追加」から登録してね！</p>';
-        }
+        const recipeList = document.getElementById('recipe-list');
+        recipeList.innerHTML = recipes.length ? '' : '<p style="text-align:center; color:#999;">レシピがまだありません。</p>';
         recipes.forEach(recipe => {
             const div = document.createElement('div');
             div.className = 'recipe-item';
@@ -128,21 +160,14 @@
     }
 
     function showDetail(recipe) {
-        listView.style.display = 'none';
-        formView.style.display = 'none';
-        header.style.display = 'none';
-        detailView.style.display = 'block';
+        currentRecipe = recipe;
+        switchView('detail-view');
         document.getElementById('detail-title').innerText = recipe.title;
-        document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.filter(i => i.trim() !== "").map(i => `<li>${i}</li>`).join('');
+        document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
         document.getElementById('detail-steps').innerText = recipe.steps;
     }
 
-    function showList() {
-        listView.style.display = 'block';
-        header.style.display = 'flex';
-        detailView.style.display = 'none';
-        formView.style.display = 'none';
-    }
+    function showList() { switchView('list-view'); }
 
     renderList();
 </script>
