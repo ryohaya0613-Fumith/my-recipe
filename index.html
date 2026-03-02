@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>My Recipe Book</title>
+    <style>
+        body { font-family: sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        h1 { text-align: center; color: #e67e22; }
+        
+        /* 一覧画面 */
+        .recipe-list { display: grid; gap: 10px; }
+        .recipe-item { background: white; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .recipe-item:hover { background: #fff5eb; }
+
+        /* 詳細画面（初期は非表示） */
+        #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .back-btn { background: #e67e22; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>My Recipe Book</h1>
+
+    <div id="list-view">
+        <div class="recipe-list" id="recipe-list">
+            </div>
+    </div>
+
+    <div id="detail-view">
+        <button class="back-btn" onclick="showList()">← 一覧に戻る</button>
+        <h2 id="detail-title"></h2>
+        <h3>材料</h3>
+        <ul id="detail-ingredients"></ul>
+        <h3>作り方</h3>
+        <p id="detail-steps"></p>
+    </div>
+</div>
+
+<script>
+    // レシピのデータ
+    const recipes = [
+        { id: 1, title: "絶品パラパラ炒飯", ingredients: ["ご飯 1杯", "卵 1個", "ネギ 適量"], steps: "1.卵を炒める。 2.ご飯を入れる。 3.強火で混ぜる。" },
+        { id: 2, title: "時短キーマカレー", ingredients: ["ひき肉 200g", "玉ねぎ 1個", "カレールー 2個"], steps: "1.玉ねぎを刻む。 2.全部炒める。 3.ルーを溶かす。" }
+    ];
+
+    const listView = document.getElementById('list-view');
+    const detailView = document.getElementById('detail-view');
+    const recipeList = document.getElementById('recipe-list');
+
+    // 一覧を表示する関数
+    function renderList() {
+        recipeList.innerHTML = '';
+        recipes.forEach(recipe => {
+            const div = document.createElement('div');
+            div.className = 'recipe-item';
+            div.innerHTML = `<strong>${recipe.title}</strong>`;
+            div.onclick = () => showDetail(recipe);
+            recipeList.appendChild(div);
+        });
+    }
+
+    // 詳細を表示する関数
+    function showDetail(recipe) {
+        listView.style.display = 'none';
+        detailView.style.display = 'block';
+        document.getElementById('detail-title').innerText = recipe.title;
+        document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+        document.getElementById('detail-steps').innerText = recipe.steps;
+    }
+
+    // 一覧に戻る関数
+    function showList() {
+        listView.style.display = 'block';
+        detailView.style.display = 'none';
+    }
+
+    // 最初に一覧を表示
+    renderList();
+</script>
+
+</body>
+</html>
