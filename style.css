@@ -18,33 +18,21 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .recipe-list { display: grid; gap: 10px; }
 .recipe-item { background: white; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-.recipe-info { 
-    font-size: 12px; 
-    margin-top: 8px; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-}
+.recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 
 /* 共通バッジスタイル */
-.badge {
-    padding: 2px 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 10px;
-    color: white; /* 基本は白文字 */
-}
+.badge { padding: 2px 10px; border-radius: 4px; font-weight: bold; font-size: 10px; color: white; }
 
-/* 肉タグ：背景色指定 */
-.bg-豚 { background-color: #9acd32; }     /* 黄緑 (YellowGreen) */
-.bg-鶏 { background-color: #228b22; }     /* 緑 (ForestGreen) */
-.bg-ひき肉 { background-color: #1e90ff; } /* 青 (DodgerBlue) */
-.bg-その他 { background-color: #9370db; } /* 紫 (MediumPurple) */
+/* Tier：左側用 */
+.tier-1 { background-color: #ffa500; }
+.tier-2 { background-color: #ffd700; color: #333; }
+.tier-3 { background-color: #ff4500; }
 
-/* Tier：背景色指定（1:オレンジ → 2:黄 → 3:赤） */
-.tier-1 { background-color: #ffa500; } /* オレンジ */
-.tier-2 { background-color: #ffd700; color: #333; } /* 黄色 (見やすさのため文字色を暗く) */
-.tier-3 { background-color: #ff4500; } /* 赤 (OrangeRed) */
+/* 肉タグ：右側用 */
+.bg-豚 { background-color: #9acd32; }
+.bg-鶏 { background-color: #228b22; }
+.bg-ひき肉 { background-color: #1e90ff; }
+.bg-その他 { background-color: #9370db; }
 
 .edit-btn { position: absolute; top: 20px; right: 20px; background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
 .back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
