@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>りょう君の自炊ルーレット</title>
+    <title>自炊ルーレット</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -42,10 +42,10 @@
         <input type="text" id="input-title" placeholder="料理名">
         <div class="select-group">
             <select id="input-tier">
-                <option value="">Tier（手間）を選択</option>
-                <option value="1">Tier 1（すぐできる）</option>
-                <option value="2">Tier 2（ふつう）</option>
-                <option value="3">Tier 3（気合）</option>
+                <option value="">Tierを選択</option>
+                <option value="1">Tier 1</option>
+                <option value="2">Tier 2</option>
+                <option value="3">Tier 3</option>
             </select>
             <select id="input-meat">
                 <option value="">肉タグを選択</option>
@@ -64,8 +64,8 @@
             <button type="button" class="add-sub-btn" onclick="addSeasoningGroup()">＋ 調味料グループを追加</button>
         </div>
 
-        <textarea id="input-steps" placeholder="手順（改行すると自動で番号がつきます）" rows="5"></textarea>
-        <textarea id="input-memo" placeholder="備考・メモ（コツなど）"></textarea>
+        <textarea id="input-steps" placeholder="手順（改行で番号がつきます）" rows="5"></textarea>
+        <textarea id="input-memo" placeholder="備考・メモ"></textarea>
         
         <button class="save-btn" onclick="saveRecipe()">保存する</button>
         <button class="cancel-btn" onclick="closeForm()">キャンセル</button>
@@ -76,12 +76,12 @@
         <button class="edit-btn" onclick="openEdit()">編集</button>
         <h2 id="detail-title"></h2>
         <div style="margin-bottom: 10px;">
-            <span id="detail-tier-tag" class="tag"></span>
-            <span id="detail-meat-tag" class="tag"></span>
+            <span id="detail-tier-tag" class="badge"></span>
+            <span id="detail-meat-tag" class="badge"></span>
         </div>
         
         <div class="ingredients-box">
-            <strong>材料</strong>
+            <strong class="section-title-ing">材料</strong>
             <ul id="detail-ingredients"></ul>
         </div>
 
