@@ -1,36 +1,61 @@
-body { font-family: sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 20px; }
+body { font-family: sans-serif; background: #f0f2f5; color: #333; margin: 0; padding: 20px; }
 .container { max-width: 600px; margin: auto; position: relative; }
 
 .sticky-header {
     position: -webkit-sticky;
     position: sticky;
     top: 0;
-    background: #f9f9f9;
+    background: #f0f2f5;
     z-index: 100;
     padding-top: 5px;
     padding-bottom: 10px;
 }
 
 .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e67e22; padding-bottom: 10px; margin-bottom: 10px; }
-h1 { margin: 0; color: #e67e22; font-size: 24px; }
+h1 { margin: 0; color: #e67e22; font-size: 22px; }
 .nav-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-.filter-area { display: flex; gap: 10px; margin-bottom: 10px; }
-.filter-area select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; background: white; }
+/* フィルターエリア：横1列に配置 */
+.filter-area { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: nowrap; }
+.filter-area select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; background: white; font-size: 14px; min-width: 0; }
 
-.card { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; }
-input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-.select-group { display: flex; gap: 10px; }
+/* チェックボックスを大きく調整 */
+.fav-filter { 
+    display: flex; align-items: center; gap: 6px; 
+    font-size: 14px; font-weight: bold; color: #e67e22; 
+    cursor: pointer; white-space: nowrap; 
+    padding: 4px 0;
+}
+.fav-filter input[type="checkbox"] {
+    width: 20px; height: 20px; cursor: pointer; margin: 0;
+}
 
-.save-btn { background: #e67e22; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+.card { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
+input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+
+.save-btn { background: #e67e22; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
 .cancel-btn { background: none; border: none; color: #999; width: 100%; margin-top: 10px; cursor: pointer; }
 
-.recipe-list { display: grid; gap: 10px; }
-.recipe-item { background: white; padding: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.recipe-list { display: grid; gap: 15px; }
+.recipe-item { 
+    background: white; padding: 15px; border-radius: 12px; cursor: pointer; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; border: 1px solid rgba(0,0,0,0.05);
+}
 .recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 
-/* 共通バッジスタイル */
-.badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; color: white; display: inline-block; margin-right: 5px; }
+.star-btn { position: absolute; top: 12px; right: 12px; font-size: 20px; color: #ccc; }
+.star-btn.active { color: #f1c40f; }
+
+.detail-nav { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+.edit-btn { background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+.delete-detail-btn { background: #ff4d4d; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+
+.detail-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.star-btn-large { font-size: 28px; color: #ccc; cursor: pointer; }
+.star-btn-large.active { color: #f1c40f; }
+
+.badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; color: white; display: inline-block; }
 .tier-1 { background-color: #ffa500; }
 .tier-2 { background-color: #ffd700; color: #333; }
 .tier-3 { background-color: #ff4500; }
@@ -39,38 +64,23 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .bg-ひき肉 { background-color: #1e90ff; }
 .bg-その他 { background-color: #9370db; }
 
-.edit-btn { position: absolute; top: 20px; right: 20px; background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
-.back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
-.delete-detail-btn { background: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-
 .ingredients-box { background: #fff5eb; padding: 15px; border-radius: 8px; margin: 15px 0; }
-/* 材料のタイトル下の点線 */
 .section-title-ing { color: #e67e22; display: block; margin-bottom: 5px; border-bottom: 1px dashed #e67e22; padding-bottom: 2px; }
-
-.memo-box { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #ccc; }
-.pre-wrap { white-space: pre-wrap; line-height: 1.6; margin: 5px 0; }
-
-.seasoning-input-area { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
-.seasoning-group-item { background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #ddd; }
-.remove-btn { background: #ff4d4d; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; float: right; }
-.add-sub-btn { background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-
 .seasoning-box { background: #eef9ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3498db; }
-/* 調味料のタイトル下の点線 */
 .seasoning-box strong { color: #3498db; display: block; margin-bottom: 5px; border-bottom: 1px dashed #3498db; padding-bottom: 2px; }
 
 .steps-list { margin: 10px 0; counter-reset: step-counter; }
-.step-item { position: relative; padding: 10px 10px 10px 45px; margin-bottom: 20px; background: white; border: 1px solid #eee; border-radius: 5px; line-height: 1.5; min-height: 25px; }
+.step-item { position: relative; padding: 10px 10px 10px 45px; margin-bottom: 20px; background: white; border: 1px solid #eee; border-radius: 5px; line-height: 1.5; }
 .step-item::before {
-    counter-increment: step-counter;
-    content: counter(step-counter);
+    counter-increment: step-counter; content: counter(step-counter);
     position: absolute; left: 10px; top: 10px;
     width: 24px; height: 24px; background: #e67e22; color: white;
     font-size: 14px; font-weight: bold; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
 }
 .step-item:not(:last-child)::after {
-    content: "↓";
-    position: absolute; bottom: -22px; left: 17px;
+    content: "↓"; position: absolute; bottom: -22px; left: 17px;
     color: #e67e22; font-weight: bold; font-size: 18px;
 }
+.pre-wrap { white-space: pre-wrap; line-height: 1.6; }
+.memo-box { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #ccc; }

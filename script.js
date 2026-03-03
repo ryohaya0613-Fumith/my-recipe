@@ -42,14 +42,33 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], seasoningGroups: [], steps: "焼き固め\n低温加熱。", memo: "赤ワイン" }
 ];
 
-// 保存データの読み込み
+// --- [初期データ initialRecipes は省略] ---
+
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
 
-// 画面切り替え
+function toggleFavorite(id, event) {
+    if (event) event.stopPropagation();
+    const recipe = recipes.find(r => r.id === id);
+    if (recipe) {
+        recipe.isFavorite = !recipe.isFavorite;
+        localStorage.setItem('myRecipes', JSON.stringify(recipes));
+        renderList();
+        if (currentRecipe && currentRecipe.id === id) {
+            updateFavBtnStyle(recipe.isFavorite);
+        }
+    }
+}
+
+function updateFavBtnStyle(isFav) {
+    const favBtn = document.getElementById('detail-fav-btn');
+    favBtn.innerText = isFav ? "★" : "☆";
+    favBtn.classList.toggle('active', isFav);
+}
+
 function switchView(viewId) {
     ['list-view', 'form-view', 'detail-view'].forEach(v => {
         document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
@@ -59,20 +78,18 @@ function switchView(viewId) {
     window.scrollTo(0, 0);
 }
 
-// 調味料グループの入力行を追加
 function addSeasoningGroup(name = "", items = "") {
     const container = document.getElementById('seasoning-groups');
     const div = document.createElement('div');
     div.className = 'seasoning-group-item';
     div.innerHTML = `
         <button type="button" class="remove-btn" onclick="this.parentElement.remove()">×</button>
-        <input type="text" class="input-group-name" placeholder="グループ名（例：タルタル用）" value="${name}">
+        <input type="text" class="input-group-name" placeholder="グループ名" value="${name}">
         <textarea class="input-group-items" placeholder="調味料（、で区切る）">${items}</textarea>
     `;
     container.appendChild(div);
 }
 
-// 追加ボタン
 function toggleForm() {
     document.getElementById('form-title').innerText = "レシピを追加";
     document.getElementById('entry-id').value = "";
@@ -83,12 +100,10 @@ function toggleForm() {
     document.getElementById('seasoning-groups').innerHTML = ""; 
     document.getElementById('input-steps').value = '';
     document.getElementById('input-memo').value = '';
-    
     currentRecipe = null; 
     switchView('form-view');
 }
 
-// 保存
 function saveRecipe() {
     const id = document.getElementById('entry-id').value;
     const title = document.getElementById('input-title').value;
@@ -96,24 +111,21 @@ function saveRecipe() {
     const meat = document.getElementById('input-meat').value;
     
     const groupEls = document.querySelectorAll('.seasoning-group-item');
-    const seasoningGroups = Array.from(groupEls).map(el => {
-        return {
-            name: el.querySelector('.input-group-name').value,
-            items: el.querySelector('.input-group-items').value.split(/[、\n]/).filter(v => v.trim() !== "")
-        };
-    }).filter(g => g.name || g.items.length > 0);
+    const seasoningGroups = Array.from(groupEls).map(el => ({
+        name: el.querySelector('.input-group-name').value,
+        items: el.querySelector('.input-group-items').value.split(/[、\n]/).filter(v => v.trim() !== "")
+    })).filter(g => g.name || g.items.length > 0);
 
     if (!title || !meat || !tier) return alert("必須項目を入力してね！");
 
     const recipeData = {
         id: id ? Number(id) : Date.now(),
-        title: title,
-        meat: meat,
-        tier: tier,
+        title: title, meat: meat, tier: tier,
         ingredients: document.getElementById('input-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== ""),
         seasoningGroups: seasoningGroups,
         steps: document.getElementById('input-steps').value,
-        memo: document.getElementById('input-memo').value
+        memo: document.getElementById('input-memo').value,
+        isFavorite: currentRecipe ? currentRecipe.isFavorite : false
     };
 
     const index = id ? recipes.findIndex(r => r.id === Number(id)) : -1;
@@ -125,34 +137,17 @@ function saveRecipe() {
     showDetail(recipeData);
 }
 
-// 編集
-function openEdit() {
-    document.getElementById('form-title').innerText = "レシピを編集";
-    document.getElementById('entry-id').value = currentRecipe.id;
-    document.getElementById('input-title').value = currentRecipe.title;
-    document.getElementById('input-tier').value = currentRecipe.tier;
-    document.getElementById('input-meat').value = currentRecipe.meat;
-    document.getElementById('input-ingredients').value = currentRecipe.ingredients.join('、');
-    
-    document.getElementById('seasoning-groups').innerHTML = "";
-    if (currentRecipe.seasoningGroups) {
-        currentRecipe.seasoningGroups.forEach(g => addSeasoningGroup(g.name, g.items.join('、')));
-    }
-    
-    document.getElementById('input-steps').value = currentRecipe.steps;
-    document.getElementById('input-memo').value = currentRecipe.memo || '';
-    switchView('form-view');
-}
-
-// リスト表示
 function renderList() {
-    const tierFilter = document.getElementById('filter-tier').value;
-    const meatFilter = document.getElementById('filter-meat').value;
+    const tierF = document.getElementById('filter-tier').value;
+    const meatF = document.getElementById('filter-meat').value;
+    const favOnly = document.getElementById('filter-fav').checked;
     const listEl = document.getElementById('recipe-list');
     listEl.innerHTML = '';
     
     let filtered = recipes.filter(r => {
-        return (!tierFilter || r.tier === tierFilter) && (!meatFilter || r.meat === meatFilter);
+        return (!tierF || r.tier === tierF) && 
+               (!meatF || r.meat === meatF) && 
+               (!favOnly || r.isFavorite);
     });
 
     filtered.sort((a, b) => Number(a.tier) - Number(b.tier));
@@ -161,6 +156,9 @@ function renderList() {
         const div = document.createElement('div');
         div.className = 'recipe-item';
         div.innerHTML = `
+            <span class="star-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id}, event)">
+                ${recipe.isFavorite ? '★' : '☆'}
+            </span>
             <strong>${recipe.title}</strong>
             <div class="recipe-info">
                 <span class="badge tier-${recipe.tier}">Tier ${recipe.tier}</span>
@@ -172,51 +170,40 @@ function renderList() {
     });
 }
 
-// 詳細表示（タグの色付けと「→」変換を統合！）
 function showDetail(recipe) {
-    if (!recipe) {
-        showList();
-        return;
-    }
+    if (!recipe) { showList(); return; }
     currentRecipe = recipe;
     switchView('detail-view');
-
-    // タイトルとタグの設定
     document.getElementById('detail-title').innerText = recipe.title;
-    
+    updateFavBtnStyle(recipe.isFavorite);
+    document.getElementById('detail-fav-btn').onclick = () => toggleFavorite(recipe.id);
+
     const tTag = document.getElementById('detail-tier-tag');
     tTag.innerText = "Tier " + recipe.tier;
-    tTag.className = `badge tier-${recipe.tier}`; // 色クラスを付与
+    tTag.className = `badge tier-${recipe.tier}`;
     
     const mTag = document.getElementById('detail-meat-tag');
     mTag.innerText = recipe.meat;
-    mTag.className = `badge bg-${recipe.meat}`; // 色クラスを付与
+    mTag.className = `badge bg-${recipe.meat}`;
 
-    // 材料表示
     document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
     
-    // 調味料表示
     const sContainer = document.getElementById('detail-seasoning-container');
     sContainer.innerHTML = "";
-    if (recipe.seasoningGroups && recipe.seasoningGroups.length > 0) {
+    if (recipe.seasoningGroups) {
         recipe.seasoningGroups.forEach(g => {
             const box = document.createElement('div');
             box.className = 'seasoning-box';
-            box.innerHTML = `
-                <strong>${g.name || "調味料"}</strong>
-                <ul>${g.items.map(item => `<li>${item}</li>`).join('')}</ul>
-            `;
+            box.innerHTML = `<strong>${g.name || "調味料"}</strong><ul>${g.items.map(item => `<li>${item}</li>`).join('')}</ul>`;
             sContainer.appendChild(box);
         });
     }
 
-    // 手順表示（「→」を改行に変換）
     const stepsArea = document.getElementById('detail-steps-list');
     const formattedSteps = recipe.steps.replace(/→/g, '\n');
     const stepsArray = formattedSteps.split('\n').filter(s => s.trim() !== "");
     stepsArea.innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
     
-    // 備考表示
     const memoSection = document.getElementById('memo-section');
     if (recipe.memo) {
         memoSection.style.display = 'block';
@@ -229,23 +216,28 @@ function showDetail(recipe) {
         if (confirm("本当に削除してもいい？")) {
             recipes = recipes.filter(r => r.id !== recipe.id);
             localStorage.setItem('myRecipes', JSON.stringify(recipes));
-            renderList();
-            showList();
+            renderList(); showList();
         }
     };
 }
 
-function showList() { 
-    currentRecipe = null; 
-    switchView('list-view'); 
+function openEdit() {
+    document.getElementById('form-title').innerText = "レシピを編集";
+    document.getElementById('entry-id').value = currentRecipe.id;
+    document.getElementById('input-title').value = currentRecipe.title;
+    document.getElementById('input-tier').value = currentRecipe.tier;
+    document.getElementById('input-meat').value = currentRecipe.meat;
+    document.getElementById('input-ingredients').value = currentRecipe.ingredients.join('、');
+    document.getElementById('seasoning-groups').innerHTML = "";
+    if (currentRecipe.seasoningGroups) {
+        currentRecipe.seasoningGroups.forEach(g => addSeasoningGroup(g.name, g.items.join('、')));
+    }
+    document.getElementById('input-steps').value = currentRecipe.steps;
+    document.getElementById('input-memo').value = currentRecipe.memo || '';
+    switchView('form-view');
 }
 
-function closeForm() { 
-    if (!currentRecipe) {
-        showList();
-    } else {
-        showDetail(currentRecipe);
-    }
-}
+function showList() { currentRecipe = null; switchView('list-view'); }
+function closeForm() { currentRecipe ? showDetail(currentRecipe) : showList(); }
 
 renderList();
