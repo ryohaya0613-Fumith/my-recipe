@@ -1,3 +1,4 @@
+// 全40レシピの初期データ
 const initialRecipes = [
     { id: 1, title: "豚バラ白菜の味噌あん", meat: "豚", tier: "1", ingredients: ["豚バラ", "白菜"], steps: "豚バラを炒める→白菜を加えて蒸し焼き→味噌・みりん・酒で調味し軽くとろみ付け。", memo: "" },
     { id: 2, title: "タコライス", meat: "ひき肉", tier: "1", ingredients: ["ひき肉", "トマト", "サルサ", "チーズ"], steps: "ひき肉炒めてシーズニング→ご飯にレタス・チーズ・肉・トマト・サルサ。", memo: "" },
@@ -41,7 +42,7 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], steps: "焼き固め→低温加熱。", memo: "赤ワイン" }
 ];
 
-// 保存されているレシピがない、または少なくなっている場合に初期データをセット
+// 保存データの読み込みと初期設定
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
@@ -56,6 +57,7 @@ function switchView(viewId) {
     document.getElementById('filter-section').style.display = (viewId === 'list-view') ? 'flex' : 'none';
 }
 
+// 追加ボタンの挙動修正
 function toggleForm() {
     document.getElementById('form-title').innerText = "レシピを追加";
     document.getElementById('entry-id').value = "";
@@ -65,6 +67,9 @@ function toggleForm() {
     document.getElementById('input-ingredients').value = '';
     document.getElementById('input-steps').value = '';
     document.getElementById('input-memo').value = '';
+    
+    // 追加時は「今見ているレシピ」を忘れる
+    currentRecipe = null; 
     switchView('form-view');
 }
 
@@ -74,7 +79,7 @@ function saveRecipe() {
     const tier = document.getElementById('input-tier').value;
     const meat = document.getElementById('input-meat').value;
 
-    if (!title || !meat || !tier) return alert("料理名、肉タグ、Tierは入力必須だよ！");
+    if (!title || !meat || !tier) return alert("必須項目を入力してね！");
 
     const recipeData = {
         id: id ? Number(id) : Date.now(),
@@ -135,6 +140,10 @@ function renderList() {
 }
 
 function showDetail(recipe) {
+    if (!recipe) {
+        showList();
+        return;
+    }
     currentRecipe = recipe;
     switchView('detail-view');
     document.getElementById('detail-title').innerText = recipe.title;
@@ -156,12 +165,23 @@ function showDetail(recipe) {
             recipes = recipes.filter(r => r.id !== recipe.id);
             localStorage.setItem('myRecipes', JSON.stringify(recipes));
             renderList();
-            showList();
+            showList(); // 削除したら一覧へ戻る（ここでcurrentRecipeはリセットされる）
         }
     };
 }
 
-function showList() { switchView('list-view'); }
-function closeForm() { currentRecipe ? showDetail(currentRecipe) : showList(); }
+function showList() { 
+    currentRecipe = null; 
+    switchView('list-view'); 
+}
+
+// キャンセルボタンの挙動修正
+function closeForm() { 
+    if (!currentRecipe) {
+        showList(); // 追加ボタンから来た場合は一覧へ
+    } else {
+        showDetail(currentRecipe); // 編集ボタンから来た場合は詳細へ戻る
+    }
+}
 
 renderList();
