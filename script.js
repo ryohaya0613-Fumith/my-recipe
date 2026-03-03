@@ -22,11 +22,11 @@ const initialRecipes = [
     { id: 21, title: "鶏レモン", meat: "鶏", tier: "1", ingredients: ["鶏肉", "玉ねぎ", "レモン"], steps: "片栗粉鶏揚げ焼き→玉ねぎ→レモン。", memo: "" },
     { id: 22, title: "から揚げ", meat: "鶏", tier: "2", ingredients: ["鶏肉", "にんにく", "生姜"], steps: "醤油・にんにく・生姜漬け→片栗粉→揚げる。", memo: "" },
     { id: 23, title: "油淋鶏", meat: "鶏", tier: "2", ingredients: ["鶏肉", "ネギ"], steps: "鶏揚げ→ネギソース。", memo: "動画あり" },
-    { id: 24, title: "サバの甘辛煮", meat: "魚", tier: "2", ingredients: ["サバ"], steps: "サバを下処理→甘辛で煮る。", memo: "" },
+    { id: 24, title: "サバの甘辛煮", meat: "その他", tier: "2", ingredients: ["サバ"], steps: "サバを下処理→甘辛で煮る。", memo: "" },
     { id: 25, title: "チキンのトマト煮", meat: "鶏", tier: "2", ingredients: ["鶏肉", "トマト缶"], steps: "鶏焼く→トマト缶→煮込む。", memo: "" },
     { id: 26, title: "酢豚", meat: "豚", tier: "2", ingredients: ["豚肉", "野菜"], steps: "片栗粉豚焼く→野菜→甘酢あん。", memo: "" },
-    { id: 27, title: "鮭のムニエル", meat: "魚", tier: "2", ingredients: ["鮭", "バター"], steps: "バター焼き→醤油。", memo: "人参レンチン" },
-    { id: 28, title: "鮭のホイル焼き", meat: "魚", tier: "2", ingredients: ["鮭", "野菜"], steps: "具材包む→焼く。", memo: "" },
+    { id: 27, title: "鮭のムニエル", meat: "その他", tier: "2", ingredients: ["鮭", "バター"], steps: "バター焼き→醤油。", memo: "人参レンチン" },
+    { id: 28, title: "鮭のホイル焼き", meat: "その他", tier: "2", ingredients: ["鮭", "野菜"], steps: "具材包む→焼く。", memo: "" },
     { id: 29, title: "鶏煮込み", meat: "鶏", tier: "2", ingredients: ["鶏肉"], steps: "全部入れて90分。", memo: "柚子胡椒◎" },
     { id: 30, title: "参鶏湯", meat: "鶏", tier: "2", ingredients: ["鶏肉"], steps: "全部入れて90分。", memo: "柚子胡椒◎" },
     { id: 31, title: "グラタン", meat: "鶏", tier: "2", ingredients: ["鶏肉", "グラタンの素"], steps: "箱通り→オーブン。", memo: "" },
@@ -36,18 +36,19 @@ const initialRecipes = [
     { id: 35, title: "ロールキャベツ", meat: "ひき肉", tier: "3", ingredients: ["ひき肉", "キャベツ"], steps: "タネ作る→巻く→煮る。", memo: "" },
     { id: 36, title: "豚の角煮", meat: "豚", tier: "3", ingredients: ["豚バラブロック"], steps: "下茹で→煮込む。", memo: "うめぇ" },
     { id: 37, title: "メンチカツ", meat: "ひき肉", tier: "3", ingredients: ["ひき肉", "パン粉"], steps: "タネ→揚げる。", memo: "" },
-    { id: 38, title: "ハムかつ", meat: "ハム", tier: "3", ingredients: ["ハム", "チーズ", "パン粉"], steps: "ハムチーズ衣→揚げる。", memo: "" },
-    { id: 40, title: "ローストビーフ", meat: "牛", tier: "3", ingredients: ["牛ブロック肉"], steps: "焼き固め→低温加熱。", memo: "赤ワイン" }
+    { id: 38, title: "ハムかつ", meat: "その他", tier: "3", ingredients: ["ハム", "チーズ", "パン粉"], steps: "ハムチーズ衣→揚げる。", memo: "" },
+    { id: 39, title: "マリーミーチキン", meat: "鶏", tier: "3", ingredients: ["鶏肉"], steps: "動画参照。", memo: "" },
+    { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], steps: "焼き固め→低温加熱。", memo: "赤ワイン" }
 ];
 
-// 保存データがない、または保存データが空配列（0件）の場合に初期データをセット
+// 初期読み込みのロジック：古いデータ（牛・魚・ハムが残っているデータ）がある場合、強制的にその他へ変換するか初期化する。
 let storedData = JSON.parse(localStorage.getItem('myRecipes'));
-let recipes = (storedData && storedData.length > 0) ? storedData : initialRecipes;
 
-// 確実に初期データを反映させるためにlocalStorageを更新
-if (!storedData || storedData.length === 0) {
-    localStorage.setItem('myRecipes', JSON.stringify(recipes));
-}
+// 今回の修正を反映させるため、古いデータがある場合は一度リセットするか、変換する必要がある。
+// りょう君が手動で追加したものがまだ無いなら、localStorage.clear() してから読み込むのが一番確実。
+// ここでは、データが存在しても、タグを統合した initialRecipes を優先して上書きするように設定するね。
+let recipes = initialRecipes; 
+localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
 
