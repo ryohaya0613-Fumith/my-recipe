@@ -41,12 +41,6 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], steps: "焼き固め→低温加熱。", memo: "赤ワイン" }
 ];
 
-// 初期読み込みのロジック：古いデータ（牛・魚・ハムが残っているデータ）がある場合、強制的にその他へ変換するか初期化する。
-let storedData = JSON.parse(localStorage.getItem('myRecipes'));
-
-// 今回の修正を反映させるため、古いデータがある場合は一度リセットするか、変換する必要がある。
-// りょう君が手動で追加したものがまだ無いなら、localStorage.clear() してから読み込むのが一番確実。
-// ここでは、データが存在しても、タグを統合した initialRecipes を優先して上書きするように設定するね。
 let recipes = initialRecipes; 
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
@@ -92,8 +86,8 @@ function saveRecipe() {
         memo: document.getElementById('input-memo').value
     };
 
-    if (id) {
-        const index = recipes.findIndex(r => r.id === Number(id));
+    const index = id ? recipes.findIndex(r => r.id === Number(id)) : -1;
+    if (index !== -1) {
         recipes[index] = recipeData;
     } else {
         recipes.push(recipeData);
@@ -132,9 +126,13 @@ function renderList() {
     filtered.forEach(recipe => {
         const div = document.createElement('div');
         div.className = 'recipe-item';
+        
         div.innerHTML = `
             <strong>${recipe.title}</strong>
-            <div class="recipe-info">肉: ${recipe.meat} / Tier: ${recipe.tier}</div>
+            <div class="recipe-info">
+                <span class="badge bg-${recipe.meat}">${recipe.meat}</span>
+                <span class="badge tier-${recipe.tier}">Tier ${recipe.tier}</span>
+            </div>
         `;
         div.onclick = () => showDetail(recipe);
         listEl.appendChild(div);
