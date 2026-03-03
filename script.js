@@ -1,4 +1,3 @@
-// 初期データ（りょう君のテキストをマメ太が解析）
 const initialRecipes = [
     { id: 1, title: "豚バラ白菜の味噌あん", meat: "豚", tier: "1", ingredients: ["豚バラ", "白菜"], steps: "豚バラを炒める→白菜を加えて蒸し焼き→味噌・みりん・酒で調味し軽くとろみ付け。", memo: "" },
     { id: 2, title: "タコライス", meat: "ひき肉", tier: "1", ingredients: ["ひき肉", "トマト", "サルサ", "チーズ"], steps: "ひき肉炒めてシーズニング→ご飯にレタス・チーズ・肉・トマト・サルサ。", memo: "" },
@@ -38,13 +37,15 @@ const initialRecipes = [
     { id: 36, title: "豚の角煮", meat: "豚", tier: "3", ingredients: ["豚バラブロック"], steps: "下茹で→煮込む。", memo: "うめぇ" },
     { id: 37, title: "メンチカツ", meat: "ひき肉", tier: "3", ingredients: ["ひき肉", "パン粉"], steps: "タネ→揚げる。", memo: "" },
     { id: 38, title: "ハムかつ", meat: "ハム", tier: "3", ingredients: ["ハム", "チーズ", "パン粉"], steps: "ハムチーズ衣→揚げる。", memo: "" },
-    { id: 39, title: "マリーミーチキン", meat: "鶏", tier: "3", ingredients: ["鶏肉"], steps: "動画参照。", memo: "" },
     { id: 40, title: "ローストビーフ", meat: "牛", tier: "3", ingredients: ["牛ブロック肉"], steps: "焼き固め→低温加熱。", memo: "赤ワイン" }
 ];
 
-// ローカルストレージにデータがなければ初期データをセット
-let recipes = JSON.parse(localStorage.getItem('myRecipes')) || initialRecipes;
-if (!localStorage.getItem('myRecipes')) {
+// 保存データがない、または保存データが空配列（0件）の場合に初期データをセット
+let storedData = JSON.parse(localStorage.getItem('myRecipes'));
+let recipes = (storedData && storedData.length > 0) ? storedData : initialRecipes;
+
+// 確実に初期データを反映させるためにlocalStorageを更新
+if (!storedData || storedData.length === 0) {
     localStorage.setItem('myRecipes', JSON.stringify(recipes));
 }
 
