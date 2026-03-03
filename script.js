@@ -95,7 +95,6 @@ function saveRecipe() {
     const tier = document.getElementById('input-tier').value;
     const meat = document.getElementById('input-meat').value;
     
-    // 調味料グループを取得
     const groupEls = document.querySelectorAll('.seasoning-group-item');
     const seasoningGroups = Array.from(groupEls).map(el => {
         return {
@@ -173,7 +172,7 @@ function renderList() {
     });
 }
 
-// 詳細表示
+// 詳細表示（タグの色付けと「→」変換を統合！）
 function showDetail(recipe) {
     if (!recipe) {
         showList();
@@ -181,12 +180,22 @@ function showDetail(recipe) {
     }
     currentRecipe = recipe;
     switchView('detail-view');
+
+    // タイトルとタグの設定
     document.getElementById('detail-title').innerText = recipe.title;
-    document.getElementById('detail-tier-tag').innerText = "Tier: " + recipe.tier;
-    document.getElementById('detail-meat-tag').innerText = "肉: " + recipe.meat;
+    
+    const tTag = document.getElementById('detail-tier-tag');
+    tTag.innerText = "Tier " + recipe.tier;
+    tTag.className = `badge tier-${recipe.tier}`; // 色クラスを付与
+    
+    const mTag = document.getElementById('detail-meat-tag');
+    mTag.innerText = recipe.meat;
+    mTag.className = `badge bg-${recipe.meat}`; // 色クラスを付与
+
+    // 材料表示
     document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
     
-    // 調味料グループの表示
+    // 調味料表示
     const sContainer = document.getElementById('detail-seasoning-container');
     sContainer.innerHTML = "";
     if (recipe.seasoningGroups && recipe.seasoningGroups.length > 0) {
@@ -201,10 +210,13 @@ function showDetail(recipe) {
         });
     }
 
+    // 手順表示（「→」を改行に変換）
     const stepsArea = document.getElementById('detail-steps-list');
-    const stepsArray = recipe.steps.split('\n').filter(s => s.trim() !== "");
+    const formattedSteps = recipe.steps.replace(/→/g, '\n');
+    const stepsArray = formattedSteps.split('\n').filter(s => s.trim() !== "");
     stepsArea.innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
     
+    // 備考表示
     const memoSection = document.getElementById('memo-section');
     if (recipe.memo) {
         memoSection.style.display = 'block';
