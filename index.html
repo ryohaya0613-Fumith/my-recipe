@@ -2,93 +2,83 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>レシピ帳</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>りょう君の自炊ルーレット</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <div class="header" id="main-header">
-        <h1>レシピ帳</h1>
-        <button class="nav-btn" onclick="toggleForm()">新規追加</button>
+    <div id="main-header" class="header">
+        <h1>自炊ルーレット</h1>
+        <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
     </div>
 
     <div id="filter-section" class="filter-area">
+        <select id="filter-tier" onchange="renderList()">
+            <option value="">すべてのTier</option>
+            <option value="1">Tier 1</option>
+            <option value="2">Tier 2</option>
+            <option value="3">Tier 3</option>
+        </select>
         <select id="filter-meat" onchange="renderList()">
-            <option value="">すべての肉タグ</option>
+            <option value="">すべての肉</option>
             <option value="豚">豚</option>
             <option value="鶏">鶏</option>
             <option value="ひき肉">ひき肉</option>
             <option value="その他">その他</option>
         </select>
-        <select id="filter-tier" onchange="renderList()">
-            <option value="">すべてのTier</option>
-            <option value="1">Tier 1 (超簡単)</option>
-            <option value="2">Tier 2 (ふつう)</option>
-            <option value="3">Tier 3 (こだわり)</option>
-        </select>
+    </div>
+
+    <div id="list-view">
+        <div id="recipe-list" class="recipe-list"></div>
     </div>
 
     <div id="form-view" class="card">
-        <h3 id="form-title">レシピの登録</h3>
+        <h2 id="form-title">レシピを追加</h2>
         <input type="hidden" id="entry-id">
-        <input type="text" id="input-title" placeholder="料理名（必須）">
-        
+        <input type="text" id="input-title" placeholder="料理名">
         <div class="select-group">
+            <select id="input-tier">
+                <option value="">Tier（手間）を選択</option>
+                <option value="1">Tier 1（すぐできる）</option>
+                <option value="2">Tier 2（ふつう）</option>
+                <option value="3">Tier 3（気合）</option>
+            </select>
             <select id="input-meat">
-                <option value="">肉タグ（必須）</option>
+                <option value="">肉タグを選択</option>
                 <option value="豚">豚</option>
                 <option value="鶏">鶏</option>
                 <option value="ひき肉">ひき肉</option>
                 <option value="その他">その他</option>
             </select>
-            <select id="input-tier">
-                <option value="">Tier（必須）</option>
-                <option value="1">Tier 1</option>
-                <option value="2">Tier 2</option>
-                <option value="3">Tier 3</option>
-            </select>
         </div>
-
-        <textarea id="input-ingredients" placeholder="材料（「、」か改行で区切る）" rows="2"></textarea>
-        <textarea id="input-steps" placeholder="作り方" rows="4"></textarea>
-        <textarea id="input-memo" placeholder="備考（例：シソ可、動画ありなど）" rows="2"></textarea>
-        
-        <button class="save-btn" onclick="saveRecipe()">保存して閉じる</button>
+        <textarea id="input-ingredients" placeholder="主な食材（、で区切る）"></textarea>
+        <textarea id="input-steps" placeholder="手順" rows="4"></textarea>
+        <textarea id="input-memo" placeholder="メモ（コツなど）"></textarea>
+        <button class="save-btn" onclick="saveRecipe()">保存する</button>
         <button class="cancel-btn" onclick="closeForm()">キャンセル</button>
-    </div>
-
-    <div id="list-view">
-        <div class="recipe-list" id="recipe-list"></div>
     </div>
 
     <div id="detail-view" class="card">
         <button class="back-btn" onclick="showList()">← 戻る</button>
         <button class="edit-btn" onclick="openEdit()">編集</button>
-        
         <h2 id="detail-title"></h2>
-        <div class="tags">
-            <span id="detail-meat-tag" class="tag"></span>
+        <div style="margin-bottom: 10px;">
             <span id="detail-tier-tag" class="tag"></span>
+            <span id="detail-meat-tag" class="tag"></span>
         </div>
-
         <div class="ingredients-box">
             <strong>材料</strong>
             <ul id="detail-ingredients"></ul>
         </div>
-
-        <h3>作り方</h3>
+        <strong>手順</strong>
         <p id="detail-steps" class="pre-wrap"></p>
-
-        <div id="memo-section" class="memo-box">
-            <strong>備考</strong>
-            <p id="detail-memo" class="pre-wrap"></p>
+        <div id="memo-section">
+            <strong>メモ</strong>
+            <div id="detail-memo" class="memo-box pre-wrap"></div>
         </div>
-
-        <div style="text-align: right; margin-top: 30px;">
-            <button class="delete-detail-btn" id="delete-btn-detail">レシピを削除</button>
-        </div>
+        <button id="delete-btn-detail" class="delete-detail-btn" style="margin-top:20px;">このレシピを削除</button>
     </div>
 </div>
 
