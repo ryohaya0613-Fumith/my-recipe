@@ -9,25 +9,27 @@
 <body>
 
 <div class="container">
-    <div id="main-header" class="header">
-        <h1>自炊ルーレット</h1>
-        <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
-    </div>
+    <div class="sticky-header">
+        <div id="main-header" class="header">
+            <h1>自炊ルーレット</h1>
+            <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
+        </div>
 
-    <div id="filter-section" class="filter-area">
-        <select id="filter-tier" onchange="renderList()">
-            <option value="">すべてのTier</option>
-            <option value="1">Tier 1</option>
-            <option value="2">Tier 2</option>
-            <option value="3">Tier 3</option>
-        </select>
-        <select id="filter-meat" onchange="renderList()">
-            <option value="">すべての肉</option>
-            <option value="豚">豚</option>
-            <option value="鶏">鶏</option>
-            <option value="ひき肉">ひき肉</option>
-            <option value="その他">その他</option>
-        </select>
+        <div id="filter-section" class="filter-area">
+            <select id="filter-tier" onchange="renderList()">
+                <option value="">すべてのTier</option>
+                <option value="1">Tier 1</option>
+                <option value="2">Tier 2</option>
+                <option value="3">Tier 3</option>
+            </select>
+            <select id="filter-meat" onchange="renderList()">
+                <option value="">すべての肉</option>
+                <option value="豚">豚</option>
+                <option value="鶏">鶏</option>
+                <option value="ひき肉">ひき肉</option>
+                <option value="その他">その他</option>
+            </select>
+        </div>
     </div>
 
     <div id="list-view">
