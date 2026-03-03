@@ -55,9 +55,18 @@
                 <option value="その他">その他</option>
             </select>
         </div>
+        
         <textarea id="input-ingredients" placeholder="主な食材（、で区切る）"></textarea>
-        <textarea id="input-steps" placeholder="手順" rows="4"></textarea>
-        <textarea id="input-memo" placeholder="メモ（コツなど）"></textarea>
+
+        <div class="seasoning-input-area">
+            <strong>調味料（グループごと）</strong>
+            <div id="seasoning-groups"></div>
+            <button type="button" class="add-sub-btn" onclick="addSeasoningGroup()">＋ 調味料グループを追加</button>
+        </div>
+
+        <textarea id="input-steps" placeholder="手順（改行すると自動で番号がつきます）" rows="5"></textarea>
+        <textarea id="input-memo" placeholder="備考・メモ（コツなど）"></textarea>
+        
         <button class="save-btn" onclick="saveRecipe()">保存する</button>
         <button class="cancel-btn" onclick="closeForm()">キャンセル</button>
     </div>
@@ -70,14 +79,19 @@
             <span id="detail-tier-tag" class="tag"></span>
             <span id="detail-meat-tag" class="tag"></span>
         </div>
+        
         <div class="ingredients-box">
             <strong>材料</strong>
             <ul id="detail-ingredients"></ul>
         </div>
+
+        <div id="detail-seasoning-container"></div>
+
         <strong>手順</strong>
-        <p id="detail-steps" class="pre-wrap"></p>
+        <div id="detail-steps-list" class="steps-list"></div>
+
         <div id="memo-section">
-            <strong>メモ</strong>
+            <strong>備考</strong>
             <div id="detail-memo" class="memo-box pre-wrap"></div>
         </div>
         <button id="delete-btn-detail" class="delete-detail-btn" style="margin-top:20px;">このレシピを削除</button>
