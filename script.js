@@ -42,7 +42,7 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], seasoningGroups: [], steps: "焼き固め\n低温加熱。", memo: "赤ワイン" }
 ];
 
-// --- [初期データ initialRecipes は省略] ---
+// 全40レシピの初期データ (initialRecipes) は省略
 
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
@@ -50,9 +50,8 @@ recipes = recipes.map(r => ({ ...r, cookCount: r.cookCount || 0 }));
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
-let currentSort = 'default'; // 'default', 'desc' (多い順), 'asc' (少ない順)
+let currentSort = 'default';
 
-// ソートの切り替え
 function toggleSort() {
     const btn = document.getElementById('sort-btn');
     if (currentSort === 'default') {
@@ -178,7 +177,6 @@ function renderList() {
                (!favOnly || r.isFavorite);
     });
 
-    // ソート処理
     if (currentSort === 'desc') {
         filtered.sort((a, b) => (b.cookCount || 0) - (a.cookCount || 0));
     } else if (currentSort === 'asc') {
