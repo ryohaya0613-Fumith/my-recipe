@@ -46,9 +46,37 @@ const initialRecipes = [
 
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
+recipes = recipes.map(r => ({ ...r, cookCount: r.cookCount || 0 }));
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
+let currentSort = 'default'; // 'default', 'desc' (多い順), 'asc' (少ない順)
+
+// ソートの切り替え
+function toggleSort() {
+    const btn = document.getElementById('sort-btn');
+    if (currentSort === 'default') {
+        currentSort = 'desc';
+        btn.innerText = '📊 回数順に並び替え: 多い順';
+    } else if (currentSort === 'desc') {
+        currentSort = 'asc';
+        btn.innerText = '📊 回数順に並び替え: 少ない順';
+    } else {
+        currentSort = 'default';
+        btn.innerText = '📊 回数順に並び替え: 標準';
+    }
+    renderList();
+}
+
+function updateCount(diff) {
+    if (!currentRecipe) return;
+    currentRecipe.cookCount = Math.max(0, (currentRecipe.cookCount || 0) + diff);
+    const index = recipes.findIndex(r => r.id === currentRecipe.id);
+    if (index !== -1) recipes[index].cookCount = currentRecipe.cookCount;
+    localStorage.setItem('myRecipes', JSON.stringify(recipes));
+    document.getElementById('detail-cook-count').innerText = currentRecipe.cookCount;
+    renderList();
+}
 
 function toggleFavorite(id, event) {
     if (event) event.stopPropagation();
@@ -109,7 +137,6 @@ function saveRecipe() {
     const title = document.getElementById('input-title').value;
     const tier = document.getElementById('input-tier').value;
     const meat = document.getElementById('input-meat').value;
-    
     const groupEls = document.querySelectorAll('.seasoning-group-item');
     const seasoningGroups = Array.from(groupEls).map(el => ({
         name: el.querySelector('.input-group-name').value,
@@ -125,7 +152,8 @@ function saveRecipe() {
         seasoningGroups: seasoningGroups,
         steps: document.getElementById('input-steps').value,
         memo: document.getElementById('input-memo').value,
-        isFavorite: currentRecipe ? currentRecipe.isFavorite : false
+        isFavorite: currentRecipe ? currentRecipe.isFavorite : false,
+        cookCount: currentRecipe ? currentRecipe.cookCount : 0
     };
 
     const index = id ? recipes.findIndex(r => r.id === Number(id)) : -1;
@@ -150,7 +178,14 @@ function renderList() {
                (!favOnly || r.isFavorite);
     });
 
-    filtered.sort((a, b) => Number(a.tier) - Number(b.tier));
+    // ソート処理
+    if (currentSort === 'desc') {
+        filtered.sort((a, b) => (b.cookCount || 0) - (a.cookCount || 0));
+    } else if (currentSort === 'asc') {
+        filtered.sort((a, b) => (a.cookCount || 0) - (b.cookCount || 0));
+    } else {
+        filtered.sort((a, b) => Number(a.tier) - Number(b.tier));
+    }
 
     filtered.forEach(recipe => {
         const div = document.createElement('div');
@@ -164,6 +199,7 @@ function renderList() {
                 <span class="badge tier-${recipe.tier}">Tier ${recipe.tier}</span>
                 <span class="badge bg-${recipe.meat}">${recipe.meat}</span>
             </div>
+            <div class="cook-count-badge">🍳 ${recipe.cookCount || 0}</div>
         `;
         div.onclick = () => showDetail(recipe);
         listEl.appendChild(div);
@@ -175,19 +211,16 @@ function showDetail(recipe) {
     currentRecipe = recipe;
     switchView('detail-view');
     document.getElementById('detail-title').innerText = recipe.title;
+    document.getElementById('detail-cook-count').innerText = recipe.cookCount || 0;
     updateFavBtnStyle(recipe.isFavorite);
     document.getElementById('detail-fav-btn').onclick = () => toggleFavorite(recipe.id);
-
     const tTag = document.getElementById('detail-tier-tag');
     tTag.innerText = "Tier " + recipe.tier;
     tTag.className = `badge tier-${recipe.tier}`;
-    
     const mTag = document.getElementById('detail-meat-tag');
     mTag.innerText = recipe.meat;
     mTag.className = `badge bg-${recipe.meat}`;
-
     document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
-    
     const sContainer = document.getElementById('detail-seasoning-container');
     sContainer.innerHTML = "";
     if (recipe.seasoningGroups) {
@@ -198,12 +231,10 @@ function showDetail(recipe) {
             sContainer.appendChild(box);
         });
     }
-
     const stepsArea = document.getElementById('detail-steps-list');
     const formattedSteps = recipe.steps.replace(/→/g, '\n');
     const stepsArray = formattedSteps.split('\n').filter(s => s.trim() !== "");
     stepsArea.innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
-    
     const memoSection = document.getElementById('memo-section');
     if (recipe.memo) {
         memoSection.style.display = 'block';
@@ -211,7 +242,6 @@ function showDetail(recipe) {
     } else {
         memoSection.style.display = 'none';
     }
-
     document.getElementById('delete-btn-detail').onclick = function() {
         if (confirm("本当に削除してもいい？")) {
             recipes = recipes.filter(r => r.id !== recipe.id);

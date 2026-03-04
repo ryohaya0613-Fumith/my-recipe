@@ -15,20 +15,20 @@ body { font-family: sans-serif; background: #f0f2f5; color: #333; margin: 0; pad
 h1 { margin: 0; color: #e67e22; font-size: 22px; }
 .nav-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
 
-/* フィルターエリア：横1列に配置 */
-.filter-area { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: nowrap; }
-.filter-area select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; background: white; font-size: 14px; min-width: 0; }
+.filter-area { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.filter-row-top { display: flex; align-items: center; gap: 8px; }
+.filter-row-top select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; background: white; font-size: 14px; min-width: 0; }
 
-/* チェックボックスを大きく調整 */
-.fav-filter { 
-    display: flex; align-items: center; gap: 6px; 
-    font-size: 14px; font-weight: bold; color: #e67e22; 
-    cursor: pointer; white-space: nowrap; 
-    padding: 4px 0;
+/* ソートボタン段 */
+.filter-row-sort { display: flex; justify-content: flex-start; }
+.sort-btn {
+    background: #fff; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px;
+    font-size: 13px; color: #666; cursor: pointer; font-weight: bold; transition: all 0.2s;
 }
-.fav-filter input[type="checkbox"] {
-    width: 20px; height: 20px; cursor: pointer; margin: 0;
-}
+.sort-btn:active { background: #e67e22; color: white; border-color: #e67e22; }
+
+.fav-filter { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: bold; color: #e67e22; cursor: pointer; white-space: nowrap; }
+.fav-filter input[type="checkbox"] { width: 18px; height: 18px; margin: 0; }
 
 .card { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: relative; }
 input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
@@ -41,10 +41,17 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     background: white; padding: 15px; border-radius: 12px; cursor: pointer; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; border: 1px solid rgba(0,0,0,0.05);
 }
+.cook-count-badge { position: absolute; bottom: 12px; right: 12px; font-size: 13px; font-weight: bold; color: #7f8c8d; }
 .recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 
 .star-btn { position: absolute; top: 12px; right: 12px; font-size: 20px; color: #ccc; }
 .star-btn.active { color: #f1c40f; }
+
+.counter-container { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; }
+.counter-controls { display: flex; align-items: center; gap: 12px; }
+.count-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: #bdc3c7; color: white; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.count-btn.plus { background: #e67e22; }
+.count-display { font-size: 20px; font-weight: bold; min-width: 30px; text-align: center; }
 
 .detail-nav { display: flex; justify-content: space-between; margin-bottom: 15px; }
 .back-btn { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
@@ -71,16 +78,7 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 
 .steps-list { margin: 10px 0; counter-reset: step-counter; }
 .step-item { position: relative; padding: 10px 10px 10px 45px; margin-bottom: 20px; background: white; border: 1px solid #eee; border-radius: 5px; line-height: 1.5; }
-.step-item::before {
-    counter-increment: step-counter; content: counter(step-counter);
-    position: absolute; left: 10px; top: 10px;
-    width: 24px; height: 24px; background: #e67e22; color: white;
-    font-size: 14px; font-weight: bold; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-}
-.step-item:not(:last-child)::after {
-    content: "↓"; position: absolute; bottom: -22px; left: 17px;
-    color: #e67e22; font-weight: bold; font-size: 18px;
-}
+.step-item::before { counter-increment: step-counter; content: counter(step-counter); position: absolute; left: 10px; top: 10px; width: 24px; height: 24px; background: #e67e22; color: white; font-size: 14px; font-weight: bold; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.step-item:not(:last-child)::after { content: "↓"; position: absolute; bottom: -22px; left: 17px; color: #e67e22; font-weight: bold; font-size: 18px; }
 .pre-wrap { white-space: pre-wrap; line-height: 1.6; }
 .memo-box { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #ccc; }
