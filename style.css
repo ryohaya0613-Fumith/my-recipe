@@ -19,7 +19,6 @@ h1 { margin: 0; color: #e67e22; font-size: 22px; }
 .filter-row-top { display: flex; align-items: center; gap: 8px; }
 .filter-row-top select { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ddd; background: white; font-size: 14px; min-width: 0; }
 
-/* ソートボタン段 */
 .filter-row-sort { display: flex; justify-content: flex-start; }
 .sort-btn {
     background: #fff; border: 1px solid #ddd; padding: 6px 12px; border-radius: 20px;
@@ -38,15 +37,34 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 
 .recipe-list { display: grid; gap: 15px; }
 .recipe-item { 
-    background: white; padding: 15px; border-radius: 12px; cursor: pointer; 
+    background: white; 
+    padding: 20px 15px; /* 上下パディングを少し増やして高さを出したよ */
+    border-radius: 12px; cursor: pointer; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; border: 1px solid rgba(0,0,0,0.05);
 }
-.cook-count-badge { position: absolute; bottom: 12px; right: 12px; font-size: 13px; font-weight: bold; color: #7f8c8d; }
+
+.recipe-item strong { 
+    display: block; 
+    margin-bottom: 12px; /* 題名とタグの間隔を広げたよ */
+    padding-right: 35px;
+}
+
+/* 一覧画面のカウンター（ピンク版） */
+.cook-count-badge { 
+    position: absolute; bottom: 12px; right: 12px; 
+    font-size: 13px; font-weight: bold; 
+    color: #000000; /* 文字を濃いピンクに */
+    background: #ffd1dc; /* 背景を薄いピンクに */
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+
 .recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 
 .star-btn { position: absolute; top: 12px; right: 12px; font-size: 20px; color: #ccc; }
 .star-btn.active { color: #f1c40f; }
 
+/* 詳細画面のカウンターは元のデザイン（グレー背景）を維持 */
 .counter-container { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; }
 .counter-controls { display: flex; align-items: center; gap: 12px; }
 .count-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: #bdc3c7; color: white; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -75,6 +93,11 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .section-title-ing { color: #e67e22; display: block; margin-bottom: 5px; border-bottom: 1px dashed #e67e22; padding-bottom: 2px; }
 .seasoning-box { background: #eef9ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3498db; }
 .seasoning-box strong { color: #3498db; display: block; margin-bottom: 5px; border-bottom: 1px dashed #3498db; padding-bottom: 2px; }
+
+/* 編集画面の削除ボタン等 */
+.seasoning-group-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; border: 1px solid #eee; }
+.remove-btn { position: absolute; top: 5px; right: 5px; background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; }
+.add-sub-btn { background: #eef9ff; color: #3498db; border: 1px dashed #3498db; padding: 8px; width: 100%; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
 
 .steps-list { margin: 10px 0; counter-reset: step-counter; }
 .step-item { position: relative; padding: 10px 10px 10px 45px; margin-bottom: 20px; background: white; border: 1px solid #eee; border-radius: 5px; line-height: 1.5; }
