@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自炊ルーレット</title>
+    <title>りょう君の自炊ルーレット</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,22 +16,27 @@
         </div>
 
         <div id="filter-section" class="filter-area">
-            <select id="filter-tier" onchange="renderList()">
-                <option value="">すべてのTier</option>
-                <option value="1">Tier 1</option>
-                <option value="2">Tier 2</option>
-                <option value="3">Tier 3</option>
-            </select>
-            <select id="filter-meat" onchange="renderList()">
-                <option value="">すべての肉</option>
-                <option value="豚">豚</option>
-                <option value="鶏">鶏</option>
-                <option value="ひき肉">ひき肉</option>
-                <option value="その他">その他</option>
-            </select>
-            <label class="fav-filter">
-                <input type="checkbox" id="filter-fav" onchange="renderList()"> ☆のみ
-            </label>
+            <div class="filter-row-top">
+                <select id="filter-tier" onchange="renderList()">
+                    <option value="">すべてのTier</option>
+                    <option value="1">Tier 1</option>
+                    <option value="2">Tier 2</option>
+                    <option value="3">Tier 3</option>
+                </select>
+                <select id="filter-meat" onchange="renderList()">
+                    <option value="">すべての肉</option>
+                    <option value="豚">豚</option>
+                    <option value="鶏">鶏</option>
+                    <option value="ひき肉">ひき肉</option>
+                    <option value="その他">その他</option>
+                </select>
+                <label class="fav-filter">
+                    <input type="checkbox" id="filter-fav" onchange="renderList()"> ☆のみ
+                </label>
+            </div>
+            <div class="filter-row-sort">
+                <button id="sort-btn" class="sort-btn" onclick="toggleSort()">📊 回数順に並び替え: 標準</button>
+            </div>
         </div>
     </div>
 
@@ -75,17 +80,22 @@
             <button class="back-btn" onclick="showList()">← 戻る</button>
             <button class="edit-btn" onclick="openEdit()">編集</button>
         </div>
-        
         <div class="detail-header-row">
             <h2 id="detail-title"></h2>
             <span id="detail-fav-btn" class="star-btn-large">☆</span>
         </div>
-
+        <div class="counter-container">
+            <span>作った回数：</span>
+            <div class="counter-controls">
+                <button class="count-btn" onclick="updateCount(-1)">－</button>
+                <span id="detail-cook-count" class="count-display">0</span>
+                <button class="count-btn plus" onclick="updateCount(1)">＋</button>
+            </div>
+        </div>
         <div style="margin-bottom: 10px;">
             <span id="detail-tier-tag" class="badge"></span>
             <span id="detail-meat-tag" class="badge"></span>
         </div>
-        
         <div class="ingredients-box">
             <strong class="section-title-ing">材料</strong>
             <ul id="detail-ingredients"></ul>
