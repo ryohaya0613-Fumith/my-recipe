@@ -12,7 +12,10 @@
     <div class="sticky-header">
         <div id="main-header" class="header">
             <h1>自炊ルーレット</h1>
-            <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
+            <div class="header-btns">
+                <button class="roulette-trigger-btn" onclick="openRoulette()">🎲 ルーレット</button>
+                <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
+            </div>
         </div>
 
         <div id="filter-section" class="filter-area">
@@ -109,6 +112,18 @@
             <div id="detail-memo" class="memo-box pre-wrap"></div>
         </div>
         <button id="delete-btn-detail" class="delete-detail-btn" style="margin-top:30px;">このレシピを削除</button>
+    </div>
+
+    <div id="roulette-overlay" class="overlay">
+        <div class="roulette-card">
+            <h2>今日のメニューは...</h2>
+            <div id="roulette-result" class="roulette-result-text">？</div>
+            <div class="roulette-controls">
+                <button id="start-roulette-btn" class="save-btn" onclick="startRoulette()">ルーレットを回す！</button>
+                <button id="go-to-recipe-btn" class="nav-btn" style="display:none;" onclick="goToRouletteRecipe()">詳細を見る</button>
+                <button class="cancel-btn" onclick="closeRoulette()">閉じる</button>
+            </div>
+        </div>
     </div>
 </div>
 
