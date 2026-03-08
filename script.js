@@ -42,16 +42,29 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], seasoningGroups: [], steps: "焼き固め\n低温加熱。", memo: "赤ワイン" }
 ];
 
-// 全40レシピの初期データ (initialRecipes) は省略
-
+// --- 初期データ読み込みと初期化 ---
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
+// initialRecipesは定義済みである前提
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
 recipes = recipes.map(r => ({ ...r, cookCount: r.cookCount || 0 }));
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
-let currentSort = 'default';
+let currentSort = 'default'; // 'default', 'desc' (多い順), 'asc' (少ない順)
 
+// --- フィルタ・ソート関連 ---
+
+// フィルタとソートをすべてリセット
+function clearFilters() {
+    document.getElementById('filter-tier').value = "";
+    document.getElementById('filter-meat').value = "";
+    document.getElementById('filter-fav').checked = false;
+    currentSort = 'default';
+    document.getElementById('sort-btn').innerText = '📊 回数順に並び替え: 標準';
+    renderList();
+}
+
+// ソートの切り替え
 function toggleSort() {
     const btn = document.getElementById('sort-btn');
     if (currentSort === 'default') {
@@ -66,6 +79,8 @@ function toggleSort() {
     }
     renderList();
 }
+
+// --- カウンター・お気に入り操作 ---
 
 function updateCount(diff) {
     if (!currentRecipe) return;
@@ -96,6 +111,8 @@ function updateFavBtnStyle(isFav) {
     favBtn.classList.toggle('active', isFav);
 }
 
+// --- ビュー切り替え ---
+
 function switchView(viewId) {
     ['list-view', 'form-view', 'detail-view'].forEach(v => {
         document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
@@ -104,6 +121,11 @@ function switchView(viewId) {
     document.getElementById('filter-section').style.display = (viewId === 'list-view') ? 'flex' : 'none';
     window.scrollTo(0, 0);
 }
+
+function showList() { currentRecipe = null; switchView('list-view'); }
+function closeForm() { currentRecipe ? showDetail(currentRecipe) : showList(); }
+
+// --- レシピ作成・編集フォーム関連 ---
 
 function addSeasoningGroup(name = "", items = "") {
     const container = document.getElementById('seasoning-groups');
@@ -128,6 +150,22 @@ function toggleForm() {
     document.getElementById('input-steps').value = '';
     document.getElementById('input-memo').value = '';
     currentRecipe = null; 
+    switchView('form-view');
+}
+
+function openEdit() {
+    document.getElementById('form-title').innerText = "レシピを編集";
+    document.getElementById('entry-id').value = currentRecipe.id;
+    document.getElementById('input-title').value = currentRecipe.title;
+    document.getElementById('input-tier').value = currentRecipe.tier;
+    document.getElementById('input-meat').value = currentRecipe.meat;
+    document.getElementById('input-ingredients').value = currentRecipe.ingredients.join('、');
+    document.getElementById('seasoning-groups').innerHTML = "";
+    if (currentRecipe.seasoningGroups) {
+        currentRecipe.seasoningGroups.forEach(g => addSeasoningGroup(g.name, g.items.join('、')));
+    }
+    document.getElementById('input-steps').value = currentRecipe.steps;
+    document.getElementById('input-memo').value = currentRecipe.memo || '';
     switchView('form-view');
 }
 
@@ -163,6 +201,8 @@ function saveRecipe() {
     renderList();
     showDetail(recipeData);
 }
+
+// --- 描画関連 ---
 
 function renderList() {
     const tierF = document.getElementById('filter-tier').value;
@@ -212,13 +252,17 @@ function showDetail(recipe) {
     document.getElementById('detail-cook-count').innerText = recipe.cookCount || 0;
     updateFavBtnStyle(recipe.isFavorite);
     document.getElementById('detail-fav-btn').onclick = () => toggleFavorite(recipe.id);
+    
     const tTag = document.getElementById('detail-tier-tag');
     tTag.innerText = "Tier " + recipe.tier;
     tTag.className = `badge tier-${recipe.tier}`;
+    
     const mTag = document.getElementById('detail-meat-tag');
     mTag.innerText = recipe.meat;
     mTag.className = `badge bg-${recipe.meat}`;
+    
     document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
+    
     const sContainer = document.getElementById('detail-seasoning-container');
     sContainer.innerHTML = "";
     if (recipe.seasoningGroups) {
@@ -229,10 +273,12 @@ function showDetail(recipe) {
             sContainer.appendChild(box);
         });
     }
+    
     const stepsArea = document.getElementById('detail-steps-list');
     const formattedSteps = recipe.steps.replace(/→/g, '\n');
     const stepsArray = formattedSteps.split('\n').filter(s => s.trim() !== "");
     stepsArea.innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
+    
     const memoSection = document.getElementById('memo-section');
     if (recipe.memo) {
         memoSection.style.display = 'block';
@@ -240,6 +286,7 @@ function showDetail(recipe) {
     } else {
         memoSection.style.display = 'none';
     }
+    
     document.getElementById('delete-btn-detail').onclick = function() {
         if (confirm("本当に削除してもいい？")) {
             recipes = recipes.filter(r => r.id !== recipe.id);
@@ -249,23 +296,5 @@ function showDetail(recipe) {
     };
 }
 
-function openEdit() {
-    document.getElementById('form-title').innerText = "レシピを編集";
-    document.getElementById('entry-id').value = currentRecipe.id;
-    document.getElementById('input-title').value = currentRecipe.title;
-    document.getElementById('input-tier').value = currentRecipe.tier;
-    document.getElementById('input-meat').value = currentRecipe.meat;
-    document.getElementById('input-ingredients').value = currentRecipe.ingredients.join('、');
-    document.getElementById('seasoning-groups').innerHTML = "";
-    if (currentRecipe.seasoningGroups) {
-        currentRecipe.seasoningGroups.forEach(g => addSeasoningGroup(g.name, g.items.join('、')));
-    }
-    document.getElementById('input-steps').value = currentRecipe.steps;
-    document.getElementById('input-memo').value = currentRecipe.memo || '';
-    switchView('form-view');
-}
-
-function showList() { currentRecipe = null; switchView('list-view'); }
-function closeForm() { currentRecipe ? showDetail(currentRecipe) : showList(); }
-
+// 起動時に実行
 renderList();
