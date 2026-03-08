@@ -1,4 +1,4 @@
-// 全40レシピの初期データ
+// --- 全40レシピの初期データ ---
 const initialRecipes = [
     { id: 1, title: "豚バラ白菜の味噌あん", meat: "豚", tier: "1", ingredients: ["豚バラ", "白菜"], seasoningGroups: [], steps: "豚バラを炒める\n白菜を加えて蒸し焼き\n味噌・みりん・酒で調味し軽くとろみ付け。", memo: "" },
     { id: 2, title: "タコライス", meat: "ひき肉", tier: "1", ingredients: ["ひき肉", "トマト", "サルサ", "チーズ"], seasoningGroups: [], steps: "ひき肉炒めてシーズニング\nご飯にレタス・チーズ・肉・トマト・サルサ。", memo: "" },
@@ -42,19 +42,23 @@ const initialRecipes = [
     { id: 40, title: "ローストビーフ", meat: "その他", tier: "3", ingredients: ["牛ブロック肉"], seasoningGroups: [], steps: "焼き固め\n低温加熱。", memo: "赤ワイン" }
 ];
 
-// --- 初期データ読み込みと初期化 ---
+// --- 初期化 ---
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
-// initialRecipesは定義済みである前提
+// ローカルストレージが空、または初期データより数が少なければ初期データを優先
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
-recipes = recipes.map(r => ({ ...r, cookCount: r.cookCount || 0 }));
+recipes = recipes.map(r => ({ 
+    ...r, 
+    cookCount: r.cookCount || 0,
+    isFavorite: r.isFavorite || false,
+    seasoningGroups: r.seasoningGroups || []
+}));
 localStorage.setItem('myRecipes', JSON.stringify(recipes));
 
 let currentRecipe = null;
-let currentSort = 'default'; // 'default', 'desc' (多い順), 'asc' (少ない順)
+let currentSort = 'default';
+let rouletteTargetRecipe = null;
 
-// --- フィルタ・ソート関連 ---
-
-// フィルタとソートをすべてリセット
+// --- フィルタ・ソート ---
 function clearFilters() {
     document.getElementById('filter-tier').value = "";
     document.getElementById('filter-meat').value = "";
@@ -64,29 +68,18 @@ function clearFilters() {
     renderList();
 }
 
-// ソートの切り替え
 function toggleSort() {
     const btn = document.getElementById('sort-btn');
-    if (currentSort === 'default') {
-        currentSort = 'desc';
-        btn.innerText = '📊 回数順に並び替え: 多い順';
-    } else if (currentSort === 'desc') {
-        currentSort = 'asc';
-        btn.innerText = '📊 回数順に並び替え: 少ない順';
-    } else {
-        currentSort = 'default';
-        btn.innerText = '📊 回数順に並び替え: 標準';
-    }
+    if (currentSort === 'default') { currentSort = 'desc'; btn.innerText = '📊 回数順に並び替え: 多い順'; }
+    else if (currentSort === 'desc') { currentSort = 'asc'; btn.innerText = '📊 回数順に並び替え: 少ない順'; }
+    else { currentSort = 'default'; btn.innerText = '📊 回数順に並び替え: 標準'; }
     renderList();
 }
 
-// --- カウンター・お気に入り操作 ---
-
+// --- カウンター・お気に入り ---
 function updateCount(diff) {
     if (!currentRecipe) return;
     currentRecipe.cookCount = Math.max(0, (currentRecipe.cookCount || 0) + diff);
-    const index = recipes.findIndex(r => r.id === currentRecipe.id);
-    if (index !== -1) recipes[index].cookCount = currentRecipe.cookCount;
     localStorage.setItem('myRecipes', JSON.stringify(recipes));
     document.getElementById('detail-cook-count').innerText = currentRecipe.cookCount;
     renderList();
@@ -99,9 +92,7 @@ function toggleFavorite(id, event) {
         recipe.isFavorite = !recipe.isFavorite;
         localStorage.setItem('myRecipes', JSON.stringify(recipes));
         renderList();
-        if (currentRecipe && currentRecipe.id === id) {
-            updateFavBtnStyle(recipe.isFavorite);
-        }
+        if (currentRecipe && currentRecipe.id === id) updateFavBtnStyle(recipe.isFavorite);
     }
 }
 
@@ -112,7 +103,6 @@ function updateFavBtnStyle(isFav) {
 }
 
 // --- ビュー切り替え ---
-
 function switchView(viewId) {
     ['list-view', 'form-view', 'detail-view'].forEach(v => {
         document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
@@ -125,8 +115,7 @@ function switchView(viewId) {
 function showList() { currentRecipe = null; switchView('list-view'); }
 function closeForm() { currentRecipe ? showDetail(currentRecipe) : showList(); }
 
-// --- レシピ作成・編集フォーム関連 ---
-
+// --- フォーム関連 ---
 function addSeasoningGroup(name = "", items = "") {
     const container = document.getElementById('seasoning-groups');
     const div = document.createElement('div');
@@ -149,7 +138,6 @@ function toggleForm() {
     document.getElementById('seasoning-groups').innerHTML = ""; 
     document.getElementById('input-steps').value = '';
     document.getElementById('input-memo').value = '';
-    currentRecipe = null; 
     switchView('form-view');
 }
 
@@ -171,20 +159,17 @@ function openEdit() {
 
 function saveRecipe() {
     const id = document.getElementById('entry-id').value;
-    const title = document.getElementById('input-title').value;
-    const tier = document.getElementById('input-tier').value;
-    const meat = document.getElementById('input-meat').value;
     const groupEls = document.querySelectorAll('.seasoning-group-item');
     const seasoningGroups = Array.from(groupEls).map(el => ({
         name: el.querySelector('.input-group-name').value,
         items: el.querySelector('.input-group-items').value.split(/[、\n]/).filter(v => v.trim() !== "")
     })).filter(g => g.name || g.items.length > 0);
 
-    if (!title || !meat || !tier) return alert("必須項目を入力してね！");
-
     const recipeData = {
         id: id ? Number(id) : Date.now(),
-        title: title, meat: meat, tier: tier,
+        title: document.getElementById('input-title').value,
+        tier: document.getElementById('input-tier').value,
+        meat: document.getElementById('input-meat').value,
         ingredients: document.getElementById('input-ingredients').value.split(/[、\n]/).filter(i => i.trim() !== ""),
         seasoningGroups: seasoningGroups,
         steps: document.getElementById('input-steps').value,
@@ -193,17 +178,17 @@ function saveRecipe() {
         cookCount: currentRecipe ? currentRecipe.cookCount : 0
     };
 
-    const index = id ? recipes.findIndex(r => r.id === Number(id)) : -1;
-    if (index !== -1) recipes[index] = recipeData;
-    else recipes.push(recipeData);
+    if (!recipeData.title || !recipeData.meat || !recipeData.tier) return alert("必須項目を入力してね！");
+
+    const idx = id ? recipes.findIndex(r => r.id === Number(id)) : -1;
+    if (idx !== -1) recipes[idx] = recipeData; else recipes.push(recipeData);
 
     localStorage.setItem('myRecipes', JSON.stringify(recipes));
     renderList();
     showDetail(recipeData);
 }
 
-// --- 描画関連 ---
-
+// --- 描画 ---
 function renderList() {
     const tierF = document.getElementById('filter-tier').value;
     const meatF = document.getElementById('filter-meat').value;
@@ -211,27 +196,17 @@ function renderList() {
     const listEl = document.getElementById('recipe-list');
     listEl.innerHTML = '';
     
-    let filtered = recipes.filter(r => {
-        return (!tierF || r.tier === tierF) && 
-               (!meatF || r.meat === meatF) && 
-               (!favOnly || r.isFavorite);
-    });
+    let filtered = recipes.filter(r => (!tierF || r.tier === tierF) && (!meatF || r.meat === meatF) && (!favOnly || r.isFavorite));
 
-    if (currentSort === 'desc') {
-        filtered.sort((a, b) => (b.cookCount || 0) - (a.cookCount || 0));
-    } else if (currentSort === 'asc') {
-        filtered.sort((a, b) => (a.cookCount || 0) - (b.cookCount || 0));
-    } else {
-        filtered.sort((a, b) => Number(a.tier) - Number(b.tier));
-    }
+    if (currentSort === 'desc') filtered.sort((a, b) => (b.cookCount || 0) - (a.cookCount || 0));
+    else if (currentSort === 'asc') filtered.sort((a, b) => (a.cookCount || 0) - (b.cookCount || 0));
+    else filtered.sort((a, b) => Number(a.tier) - Number(b.tier));
 
     filtered.forEach(recipe => {
         const div = document.createElement('div');
         div.className = 'recipe-item';
         div.innerHTML = `
-            <span class="star-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id}, event)">
-                ${recipe.isFavorite ? '★' : '☆'}
-            </span>
+            <span class="star-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id}, event)">${recipe.isFavorite ? '★' : '☆'}</span>
             <strong>${recipe.title}</strong>
             <div class="recipe-info">
                 <span class="badge tier-${recipe.tier}">Tier ${recipe.tier}</span>
@@ -245,27 +220,29 @@ function renderList() {
 }
 
 function showDetail(recipe) {
-    if (!recipe) { showList(); return; }
     currentRecipe = recipe;
     switchView('detail-view');
     document.getElementById('detail-title').innerText = recipe.title;
     document.getElementById('detail-cook-count').innerText = recipe.cookCount || 0;
+    
+    // --- 修正ポイント：お気に入りボタンのクリックイベントを追加 ---
     updateFavBtnStyle(recipe.isFavorite);
-    document.getElementById('detail-fav-btn').onclick = () => toggleFavorite(recipe.id);
+    const favBtn = document.getElementById('detail-fav-btn');
+    if (favBtn) {
+        favBtn.onclick = () => toggleFavorite(recipe.id);
+    }
+    // ---------------------------------------------------------
     
-    const tTag = document.getElementById('detail-tier-tag');
-    tTag.innerText = "Tier " + recipe.tier;
-    tTag.className = `badge tier-${recipe.tier}`;
-    
-    const mTag = document.getElementById('detail-meat-tag');
-    mTag.innerText = recipe.meat;
-    mTag.className = `badge bg-${recipe.meat}`;
+    document.getElementById('detail-tier-tag').innerText = "Tier " + recipe.tier;
+    document.getElementById('detail-tier-tag').className = `badge tier-${recipe.tier}`;
+    document.getElementById('detail-meat-tag').innerText = recipe.meat;
+    document.getElementById('detail-meat-tag').className = `badge bg-${recipe.meat}`;
     
     document.getElementById('detail-ingredients').innerHTML = recipe.ingredients.map(i => `<li>${i}</li>`).join('');
     
     const sContainer = document.getElementById('detail-seasoning-container');
     sContainer.innerHTML = "";
-    if (recipe.seasoningGroups) {
+    if (recipe.seasoningGroups && recipe.seasoningGroups.length > 0) {
         recipe.seasoningGroups.forEach(g => {
             const box = document.createElement('div');
             box.className = 'seasoning-box';
@@ -274,21 +251,14 @@ function showDetail(recipe) {
         });
     }
     
-    const stepsArea = document.getElementById('detail-steps-list');
-    const formattedSteps = recipe.steps.replace(/→/g, '\n');
-    const stepsArray = formattedSteps.split('\n').filter(s => s.trim() !== "");
-    stepsArea.innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
+    const stepsArray = recipe.steps.split('\n').filter(s => s.trim() !== "");
+    document.getElementById('detail-steps-list').innerHTML = stepsArray.map(s => `<div class="step-item">${s}</div>`).join('');
     
-    const memoSection = document.getElementById('memo-section');
-    if (recipe.memo) {
-        memoSection.style.display = 'block';
-        document.getElementById('detail-memo').innerText = recipe.memo;
-    } else {
-        memoSection.style.display = 'none';
-    }
-    
-    document.getElementById('delete-btn-detail').onclick = function() {
-        if (confirm("本当に削除してもいい？")) {
+    document.getElementById('memo-section').style.display = recipe.memo ? 'block' : 'none';
+    document.getElementById('detail-memo').innerText = recipe.memo || '';
+
+    document.getElementById('delete-btn-detail').onclick = () => {
+        if (confirm("削除していい？")) {
             recipes = recipes.filter(r => r.id !== recipe.id);
             localStorage.setItem('myRecipes', JSON.stringify(recipes));
             renderList(); showList();
@@ -296,5 +266,44 @@ function showDetail(recipe) {
     };
 }
 
-// 起動時に実行
+// --- ルーレット ---
+function openRoulette() {
+    document.getElementById('roulette-overlay').style.display = 'flex';
+    document.getElementById('roulette-result').innerText = '何が出るかな？';
+    document.getElementById('go-to-recipe-btn').style.display = 'none';
+    document.getElementById('start-roulette-btn').style.display = 'inline-block';
+}
+
+function closeRoulette() { document.getElementById('roulette-overlay').style.display = 'none'; }
+
+function startRoulette() {
+    const tierF = document.getElementById('filter-tier').value;
+    const meatF = document.getElementById('filter-meat').value;
+    const favOnly = document.getElementById('filter-fav').checked;
+    let pool = recipes.filter(r => (!tierF || r.tier === tierF) && (!meatF || r.meat === meatF) && (!favOnly || r.isFavorite));
+
+    if (pool.length === 0) return alert("条件に合うレシピがないよ！");
+
+    const resultEl = document.getElementById('roulette-result');
+    let count = 0;
+    const interval = setInterval(() => {
+        resultEl.innerText = pool[Math.floor(Math.random() * pool.length)].title;
+        count++;
+        if (count > 15) {
+            clearInterval(interval);
+            rouletteTargetRecipe = pool[Math.floor(Math.random() * pool.length)];
+            resultEl.innerText = "✨ " + rouletteTargetRecipe.title + " ✨";
+            document.getElementById('start-roulette-btn').style.display = 'none';
+            document.getElementById('go-to-recipe-btn').style.display = 'inline-block';
+        }
+    }, 80);
+}
+
+function goToRouletteRecipe() {
+    if (rouletteTargetRecipe) {
+        showDetail(rouletteTargetRecipe);
+        closeRoulette();
+    }
+}
+
 renderList();
