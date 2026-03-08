@@ -116,12 +116,44 @@
 
     <div id="roulette-overlay" class="overlay">
         <div class="roulette-card">
-            <h2>今日のメニューは...</h2>
-            <div id="roulette-result" class="roulette-result-text">？</div>
-            <div class="roulette-controls">
-                <button id="start-roulette-btn" class="save-btn" onclick="startRoulette()">ルーレットを回す！</button>
-                <button id="go-to-recipe-btn" class="nav-btn" style="display:none;" onclick="goToRouletteRecipe()">詳細を見る</button>
-                <button class="cancel-btn" onclick="closeRoulette()">閉じる</button>
+            <div id="roulette-setup">
+                <p class="roulette-msg">今日のメニューは…</p>
+                
+                <div class="roulette-options-container">
+                    <div class="opt-col">
+                        <span class="col-title">Tier</span>
+                        <label class="opt-label tier-1"><input type="checkbox" class="roulette-tier" value="1" checked> Tier1</label>
+                        <label class="opt-label tier-2"><input type="checkbox" class="roulette-tier" value="2" checked> Tier2</label>
+                        <label class="opt-label tier-3"><input type="checkbox" class="roulette-tier" value="3" checked> Tier3</label>
+                    </div>
+
+                    <div class="opt-col">
+                        <span class="col-title">🍖肉タグ</span>
+                        <label class="opt-label bg-豚"><input type="checkbox" class="roulette-meat" value="豚" checked> 豚</label>
+                        <label class="opt-label bg-鶏"><input type="checkbox" class="roulette-meat" value="鶏" checked> 鶏</label>
+                        <label class="opt-label bg-ひき肉"><input type="checkbox" class="roulette-meat" value="ひき肉" checked> ひき肉</label>
+                        <label class="opt-label bg-その他"><input type="checkbox" class="roulette-meat" value="その他" checked> 他</label>
+                    </div>
+
+                    <div class="opt-col">
+                        <span class="col-title">お気に入り</span>
+                        <label class="opt-label fav-opt"><input type="checkbox" id="roulette-fav-only"> ★</label>
+                    </div>
+                </div>
+
+                <button class="roulette-run-btn" onclick="startRoulette()">ルーレットを回す</button>
+                <p class="close-text" onclick="closeRoulette()">閉じる</p>
+            </div>
+
+            <div id="roulette-result-area" style="display: none;">
+                <p class="roulette-msg">今日のメニューは…</p>
+                <div id="roulette-result" class="roulette-result-text">？？？</div>
+                
+                <div class="roulette-controls">
+                    <button id="go-to-recipe-btn" class="detail-go-btn" onclick="goToRouletteRecipe()">詳細を見る</button>
+                    <button class="retry-btn" onclick="resetRoulette()">もう一度</button>
+                </div>
+                <p class="close-text" onclick="closeRoulette()">閉じる</p>
             </div>
         </div>
     </div>

@@ -44,7 +44,6 @@ const initialRecipes = [
 
 // --- 初期化 ---
 let savedRecipes = JSON.parse(localStorage.getItem('myRecipes'));
-// ローカルストレージが空、または初期データより数が少なければ初期データを優先
 let recipes = (savedRecipes && savedRecipes.length >= initialRecipes.length) ? savedRecipes : initialRecipes;
 recipes = recipes.map(r => ({ 
     ...r, 
@@ -98,17 +97,22 @@ function toggleFavorite(id, event) {
 
 function updateFavBtnStyle(isFav) {
     const favBtn = document.getElementById('detail-fav-btn');
-    favBtn.innerText = isFav ? "★" : "☆";
-    favBtn.classList.toggle('active', isFav);
+    if (favBtn) {
+        favBtn.innerText = isFav ? "★" : "☆";
+        favBtn.classList.toggle('active', isFav);
+    }
 }
 
 // --- ビュー切り替え ---
 function switchView(viewId) {
     ['list-view', 'form-view', 'detail-view'].forEach(v => {
-        document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
+        const el = document.getElementById(v);
+        if (el) el.style.display = (v === viewId) ? 'block' : 'none';
     });
-    document.getElementById('main-header').style.display = (viewId === 'list-view') ? 'flex' : 'none';
-    document.getElementById('filter-section').style.display = (viewId === 'list-view') ? 'flex' : 'none';
+    const header = document.getElementById('main-header');
+    const filter = document.getElementById('filter-section');
+    if (header) header.style.display = (viewId === 'list-view') ? 'flex' : 'none';
+    if (filter) filter.style.display = (viewId === 'list-view') ? 'flex' : 'none';
     window.scrollTo(0, 0);
 }
 
@@ -225,13 +229,11 @@ function showDetail(recipe) {
     document.getElementById('detail-title').innerText = recipe.title;
     document.getElementById('detail-cook-count').innerText = recipe.cookCount || 0;
     
-    // --- 修正ポイント：お気に入りボタンのクリックイベントを追加 ---
     updateFavBtnStyle(recipe.isFavorite);
     const favBtn = document.getElementById('detail-fav-btn');
     if (favBtn) {
         favBtn.onclick = () => toggleFavorite(recipe.id);
     }
-    // ---------------------------------------------------------
     
     document.getElementById('detail-tier-tag').innerText = "Tier " + recipe.tier;
     document.getElementById('detail-tier-tag').className = `badge tier-${recipe.tier}`;
@@ -269,22 +271,39 @@ function showDetail(recipe) {
 // --- ルーレット ---
 function openRoulette() {
     document.getElementById('roulette-overlay').style.display = 'flex';
-    document.getElementById('roulette-result').innerText = '何が出るかな？';
-    document.getElementById('go-to-recipe-btn').style.display = 'none';
-    document.getElementById('start-roulette-btn').style.display = 'inline-block';
+    resetRoulette();
 }
 
-function closeRoulette() { document.getElementById('roulette-overlay').style.display = 'none'; }
+function resetRoulette() {
+    document.getElementById('roulette-setup').style.display = 'block';
+    document.getElementById('roulette-result-area').style.display = 'none';
+    document.getElementById('roulette-result').innerText = '？？？';
+}
+
+function closeRoulette() { 
+    document.getElementById('roulette-overlay').style.display = 'none'; 
+}
 
 function startRoulette() {
-    const tierF = document.getElementById('filter-tier').value;
-    const meatF = document.getElementById('filter-meat').value;
-    const favOnly = document.getElementById('filter-fav').checked;
-    let pool = recipes.filter(r => (!tierF || r.tier === tierF) && (!meatF || r.meat === meatF) && (!favOnly || r.isFavorite));
+    const selectedTiers = Array.from(document.querySelectorAll('.roulette-tier:checked')).map(cb => cb.value);
+    const selectedMeats = Array.from(document.querySelectorAll('.roulette-meat:checked')).map(cb => cb.value);
+    const favOnly = document.getElementById('roulette-fav-only').checked;
+
+    let pool = recipes.filter(r => 
+        selectedTiers.includes(r.tier) && 
+        selectedMeats.includes(r.meat) && 
+        (!favOnly || r.isFavorite)
+    );
 
     if (pool.length === 0) return alert("条件に合うレシピがないよ！");
 
+    document.getElementById('roulette-setup').style.display = 'none';
+    document.getElementById('roulette-result-area').style.display = 'block';
+
     const resultEl = document.getElementById('roulette-result');
+    const goToBtn = document.getElementById('go-to-recipe-btn');
+    goToBtn.style.display = 'none';
+
     let count = 0;
     const interval = setInterval(() => {
         resultEl.innerText = pool[Math.floor(Math.random() * pool.length)].title;
@@ -293,8 +312,7 @@ function startRoulette() {
             clearInterval(interval);
             rouletteTargetRecipe = pool[Math.floor(Math.random() * pool.length)];
             resultEl.innerText = "✨ " + rouletteTargetRecipe.title + " ✨";
-            document.getElementById('start-roulette-btn').style.display = 'none';
-            document.getElementById('go-to-recipe-btn').style.display = 'inline-block';
+            goToBtn.style.display = 'inline-block';
         }
     }, 80);
 }
