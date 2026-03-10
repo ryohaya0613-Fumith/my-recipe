@@ -123,11 +123,20 @@ function toggleSort() {
 // --- カウンター・お気に入り (Firestoreを更新) ---
 async function updateCount(diff) {
     if (!currentRecipe) return;
-    const newCount = Math.max(0, (currentRecipe.cookCount || 0) + diff);
-    
-    await collectionRef.doc(currentRecipe.id.toString()).update({
-        cookCount: newCount
-    });
+
+    // Firestore側の値を直接「+1」または「-1」するように指示するよ
+    // これなら連打しても、サーバー側で順番に計算してくれるからズレないんだ
+    try {
+        await collectionRef.doc(currentRecipe.id.toString()).update({
+            cookCount: firebase.firestore.FieldValue.increment(diff)
+        });
+        
+        // 注意：画面上の表示（currentRecipe.cookCount）は、
+        // loadRecipes()内の onSnapshot が検知して自動で更新されるから、
+        // ここで手動で書き換えなくても大丈夫だよ！
+    } catch (e) {
+        console.error("カウント更新エラー:", e);
+    }
 }
 
 async function toggleFavorite(id, event) {
