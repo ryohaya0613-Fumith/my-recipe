@@ -13,6 +13,7 @@
         <div id="main-header" class="header">
             <h1>自炊ルーレット</h1>
             <div class="header-btns">
+                <button class="memo-trigger-btn" onclick="showMemoView()">🛒 買い物メモ</button>
                 <button class="roulette-trigger-btn" onclick="openRoulette()">🎲 ルーレット</button>
                 <button class="nav-btn" onclick="toggleForm()">＋ 追加</button>
             </div>
@@ -46,6 +47,29 @@
 
     <div id="list-view">
         <div id="recipe-list" class="recipe-list"></div>
+    </div>
+
+    <div id="memo-view" class="card" style="display: none;">
+        <div class="detail-nav">
+            <button class="back-btn" onclick="showList()">← 戻る</button>
+        </div>
+        <h2 style="text-align: center; margin-bottom: 20px;">🛒 買い物メモ</h2>
+        
+        <div id="memo-empty-msg" style="text-align: center; color: #888; margin: 40px 0;">
+            まだ何も追加されていません
+        </div>
+
+        <div id="memo-content" style="display: none;">
+            <div class="ingredients-box">
+                <strong class="section-title-ing">必要な材料一覧</strong>
+                <ul id="memo-aggregated-ingredients" class="memo-ing-list"></ul>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <strong>追加したレシピ</strong>
+                <div id="memo-recipe-list" class="memo-recipe-items"></div>
+            </div>
+        </div>
     </div>
 
     <div id="form-view" class="card">
@@ -82,7 +106,10 @@
     <div id="detail-view" class="card">
         <div class="detail-nav">
             <button class="back-btn" onclick="showList()">← 戻る</button>
-            <button class="edit-btn" onclick="openEdit()">編集</button>
+            <div class="detail-btns-right">
+                <button id="detail-memo-btn" class="memo-add-btn" onclick="addToMemoFromDetail()">メモに追加</button>
+                <button class="edit-btn" onclick="openEdit()">編集</button>
+            </div>
         </div>
         <div class="detail-header-row">
             <h2 id="detail-title"></h2>
@@ -118,7 +145,6 @@
         <div class="roulette-card">
             <div id="roulette-setup">
                 <p class="roulette-msg">今日のメニューは…</p>
-                
                 <div class="roulette-options-container">
                     <div class="opt-col">
                         <span class="col-title">Tier</span>
@@ -126,7 +152,6 @@
                         <label class="opt-label tier-2"><input type="checkbox" class="roulette-tier" value="2" checked> Tier2</label>
                         <label class="opt-label tier-3"><input type="checkbox" class="roulette-tier" value="3" checked> Tier3</label>
                     </div>
-
                     <div class="opt-col">
                         <span class="col-title">🍖肉タグ</span>
                         <label class="opt-label bg-豚"><input type="checkbox" class="roulette-meat" value="豚" checked> 豚</label>
@@ -134,21 +159,17 @@
                         <label class="opt-label bg-ひき肉"><input type="checkbox" class="roulette-meat" value="ひき肉" checked> ひき肉</label>
                         <label class="opt-label bg-その他"><input type="checkbox" class="roulette-meat" value="その他" checked> 他</label>
                     </div>
-
                     <div class="opt-col">
                         <span class="col-title">お気に入り</span>
                         <label class="opt-label fav-opt"><input type="checkbox" id="roulette-fav-only"> ★</label>
                     </div>
                 </div>
-
                 <button class="roulette-run-btn" onclick="startRoulette()">ルーレットを回す</button>
                 <p class="close-text" onclick="closeRoulette()">閉じる</p>
             </div>
-
             <div id="roulette-result-area" style="display: none;">
                 <p class="roulette-msg">今日のメニューは…</p>
                 <div id="roulette-result" class="roulette-result-text">？？？</div>
-                
                 <div class="roulette-controls">
                     <button id="go-to-recipe-btn" class="detail-go-btn" onclick="goToRouletteRecipe()">詳細を見る</button>
                     <button class="retry-btn" onclick="resetRoulette()">もう一度</button>
