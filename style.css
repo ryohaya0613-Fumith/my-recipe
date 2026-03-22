@@ -51,7 +51,18 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     background: white; padding: 20px 15px; border-radius: 12px; cursor: pointer; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; border: 1px solid rgba(0,0,0,0.05);
 }
-.recipe-item strong { display: block; margin-bottom: 12px; padding-right: 35px; }
+
+/* 🛒と★をまとめるコンテナ：ここが司令塔 */
+.item-left { 
+    position: absolute; 
+    top: 12px; 
+    right: 12px; 
+    display: flex; 
+    gap: 12px; /* アイコン同士のスキマ */
+    align-items: center; 
+}
+
+.recipe-item strong { display: block; margin-bottom: 12px; padding-right: 70px; font-size: 16px; }
 
 .cook-count-badge { 
     position: absolute; bottom: 12px; right: 12px; 
@@ -59,8 +70,21 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 }
 
 .recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
-.star-btn { position: absolute; top: 12px; right: 12px; font-size: 20px; color: #ccc; }
+
+/* ★ボタン：個別設定の position: absolute を削除して重なりを解消！ */
+.star-btn { 
+    font-size: 20px; 
+    color: #ccc; 
+    cursor: pointer;
+    line-height: 1; /* 高さを揃えやすくする */
+}
 .star-btn.active { color: #f1c40f; }
+
+/* 🛒アイコンのサイズ調整（もし必要なら） */
+.item-left span {
+    font-size: 18px;
+    line-height: 1;
+}
 
 /* バッジ・タグ共通 */
 .badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; color: white; display: inline-block; }
@@ -71,6 +95,55 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .bg-鶏 { background-color: #228b22; } 
 .bg-ひき肉 { background-color: #1e90ff; } 
 .bg-その他 { background-color: #9370db; }
+
+/* --- 買い物メモ画面（新規追加） --- */
+.memo-section-card { border-top: 2px solid #27ae60; }
+.memo-agg-box { background: #f0fff4; padding: 15px; border-radius: 10px; border: 1px solid #c6f6d5; margin-bottom: 20px; }
+.memo-agg-box h3 { margin-top: 0; font-size: 16px; color: #27ae60; border-bottom: 1px dashed #27ae60; padding-bottom: 5px; }
+.memo-agg-box ul { padding-left: 20px; margin-bottom: 0; }
+.memo-agg-box li { font-weight: bold; margin-bottom: 5px; color: #2d3748; }
+
+.recipe-list-mini { margin-top: 15px; }
+.memo-recipe-item { font-size: 14px; border-left: 4px solid #27ae60; }
+
+.memo-btn-detail { background: #27ae60; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+
+/* --- ヘッダーの「🛒 買い物メモ」ボタン --- */
+.memo-trigger-btn {
+    background: #8d6e63; /* 落ち着いた茶色に変更 */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+/* --- 詳細画面の「メモに追加」ボタン --- */
+.detail-btns-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.memo-add-btn {
+    background: #8d6e63; /* こちらも茶色に変更 */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+/* ホバー（マウスをのせた時）の色の変化 */
+.memo-trigger-btn:hover, .memo-add-btn:hover {
+    background: #6d4c41; /* 少し濃い茶色にして反応を出す */
+}
 
 /* 詳細画面の要素 */
 .counter-container { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; }
