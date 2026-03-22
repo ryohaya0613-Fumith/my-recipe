@@ -76,7 +76,8 @@ function loadRecipes() {
                 if (updated) updateDetailView(updated);
             }
             // メモ画面が表示中なら更新
-            if (document.getElementById('memo-view') && document.getElementById('memo-view').style.display === 'block') {
+            const memoView = document.getElementById('memo-view');
+            if (memoView && memoView.style.display === 'block') {
                 renderMemo();
             }
         }
@@ -102,26 +103,79 @@ async function setupInitialData() {
 }
 
 // --- 買い物メモ機能 ---
-function showMemoView() {
-    switchView('memo-view');
-    renderMemo();
+
+function updateMemoUI() {
+    // 1. ヘッダーのバッジ更新（変更なし）
+    const memoBtn = document.querySelector('.memo-trigger-btn');
+    if (memoBtn) {
+        const oldBadge = memoBtn.querySelector('.memo-badge');
+        if (oldBadge) oldBadge.remove();
+        if (shoppingMemoIds.length > 0) {
+            const badge = document.createElement('div');
+            badge.className = 'memo-badge';
+            badge.innerText = shoppingMemoIds.length;
+            memoBtn.appendChild(badge);
+        }
+    }
+
+    // 2. 一覧画面のチェックマーク更新
+    document.querySelectorAll('.recipe-item').forEach(item => {
+        const idStr = item.getAttribute('data-id');
+        const id = isNaN(idStr) ? idStr : Number(idStr);
+        
+        // ✅を追加する場所を「.cart-container」に変更！
+        const cartContainer = item.querySelector('.cart-container');
+        
+        if (id && cartContainer) {
+            const oldCheck = cartContainer.querySelector('.added-mark');
+            if (shoppingMemoIds.includes(id)) {
+                if (!oldCheck) {
+                    const check = document.createElement('span');
+                    check.className = 'added-mark';
+                    // 絵文字の✅だとCSSの丸背景とズレやすいため、チェック文字「✔」を使用
+                    check.innerText = '✔'; 
+                    cartContainer.appendChild(check);
+                }
+            } else if (oldCheck) {
+                oldCheck.remove();
+            }
+        }
+    });
+
+    // 3. 詳細画面のボタン更新（そのまま）
+    const detailBtn = document.getElementById('detail-memo-btn');
+    if (detailBtn && currentRecipe) {
+        const oldCheck = detailBtn.querySelector('.added-mark');
+        if (shoppingMemoIds.includes(currentRecipe.id)) {
+            if (!oldCheck) {
+                const check = document.createElement('span');
+                check.className = 'added-mark';
+                // 詳細画面のボタン内はこれまで通り絵文字の✅で見栄えを維持
+                check.innerText = '✅'; 
+                detailBtn.appendChild(check);
+            }
+        } else if (oldCheck) {
+            oldCheck.remove();
+        }
+    }
+}
+
+function addToMemo(id) {
+    if (!shoppingMemoIds.includes(id)) {
+        shoppingMemoIds.push(id);
+        updateMemoUI();
+    } else {
+        alert("すでに追加されているよ");
+    }
 }
 
 function addToMemoFromDetail() {
     if (currentRecipe) addToMemo(currentRecipe.id);
 }
 
-function addToMemo(id) {
-    if (!shoppingMemoIds.includes(id)) {
-        shoppingMemoIds.push(id);
-        alert("買い物メモに追加したよ！");
-    } else {
-        alert("すでに追加されているよ");
-    }
-}
-
 function removeFromMemo(id) {
     shoppingMemoIds = shoppingMemoIds.filter(mid => mid !== id);
+    updateMemoUI();
     renderMemo();
 }
 
@@ -142,7 +196,7 @@ function renderMemo() {
 
     const selectedRecipes = recipes.filter(r => shoppingMemoIds.includes(r.id));
 
-    // 材料の集計（×個数ロジック）
+    // 材料の集計
     const ingredientMap = {};
     selectedRecipes.forEach(r => {
         r.ingredients.forEach(ing => {
@@ -169,6 +223,11 @@ function renderMemo() {
         `;
         recipeList.appendChild(item);
     });
+}
+
+function showMemoView() {
+    switchView('memo-view');
+    renderMemo();
 }
 
 // --- フィルタ・ソート ---
@@ -253,10 +312,15 @@ function renderList() {
     filtered.forEach(recipe => {
         const div = document.createElement('div');
         div.className = 'recipe-item';
+        div.setAttribute('data-id', recipe.id);
         div.innerHTML = `
             <div class="item-left">
-                <span style="cursor:pointer; font-size:1.2rem; margin-right:5px;" onclick="event.stopPropagation(); addToMemo(${recipe.id})">🛒</span>
-                <span class="star-btn ${recipe.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${recipe.id}, event)">${recipe.isFavorite ? '★' : '☆'}</span>
+                <div class="cart-container" onclick="event.stopPropagation(); addToMemo(${recipe.id})">
+                    <span class="cart-btn-icon">🛒</span>
+                </div>
+                <span class="star-btn ${recipe.isFavorite ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite(${recipe.id}, event)">
+                    ${recipe.isFavorite ? '★' : '☆'}
+                </span>
             </div>
             <strong>${recipe.title}</strong>
             <div class="recipe-info">
@@ -268,12 +332,15 @@ function renderList() {
         div.onclick = () => showDetail(recipe);
         listEl.appendChild(div);
     });
+    
+    updateMemoUI();
 }
 
 function showDetail(recipe) {
     currentRecipe = recipe;
     switchView('detail-view');
     updateDetailView(recipe);
+    updateMemoUI(); // 詳細画面でも最新状態に
 }
 
 function updateDetailView(recipe) {

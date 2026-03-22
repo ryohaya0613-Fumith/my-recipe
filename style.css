@@ -52,14 +52,28 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; border: 1px solid rgba(0,0,0,0.05);
 }
 
-/* 🛒と★をまとめるコンテナ：ここが司令塔 */
+/* 🛒と★をまとめるコンテナ */
 .item-left { 
     position: absolute; 
     top: 12px; 
     right: 12px; 
     display: flex; 
-    gap: 12px; /* アイコン同士のスキマ */
+    gap: 15px; /* アイコン同士のスキマ */
     align-items: center; 
+}
+
+/* 🛒専用のコンテナ：✅をここに浮かせる */
+.cart-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 🛒自体のサイズ */
+.cart-btn-icon {
+    font-size: 20px;
+    line-height: 1;
 }
 
 .recipe-item strong { display: block; margin-bottom: 12px; padding-right: 70px; font-size: 16px; }
@@ -71,20 +85,17 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 
 .recipe-info { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
 
-/* ★ボタン：個別設定の position: absolute を削除して重なりを解消！ */
+/* ★ボタン：横並び用 */
 .star-btn { 
     font-size: 20px; 
     color: #ccc; 
     cursor: pointer;
-    line-height: 1; /* 高さを揃えやすくする */
+    line-height: 1;
+    background: none;
+    border: none;
+    padding: 0;
 }
 .star-btn.active { color: #f1c40f; }
-
-/* 🛒アイコンのサイズ調整（もし必要なら） */
-.item-left span {
-    font-size: 18px;
-    line-height: 1;
-}
 
 /* バッジ・タグ共通 */
 .badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; color: white; display: inline-block; }
@@ -96,7 +107,7 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .bg-ひき肉 { background-color: #1e90ff; } 
 .bg-その他 { background-color: #9370db; }
 
-/* --- 買い物メモ画面（新規追加） --- */
+/* --- 買い物メモ画面 --- */
 .memo-section-card { border-top: 2px solid #27ae60; }
 .memo-agg-box { background: #f0fff4; padding: 15px; border-radius: 10px; border: 1px solid #c6f6d5; margin-bottom: 20px; }
 .memo-agg-box h3 { margin-top: 0; font-size: 16px; color: #27ae60; border-bottom: 1px dashed #27ae60; padding-bottom: 5px; }
@@ -108,9 +119,9 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 
 .memo-btn-detail { background: #27ae60; color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
 
-/* --- ヘッダーの「🛒 買い物メモ」ボタン --- */
+/* ヘッダーの買い物メモボタン */
 .memo-trigger-btn {
-    background: #8d6e63; /* 落ち着いた茶色に変更 */
+    background: #8d6e63;
     color: white;
     border: none;
     padding: 8px 12px;
@@ -119,9 +130,10 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     font-weight: bold;
     font-size: 14px;
     transition: background 0.2s;
+    position: relative;
 }
 
-/* --- 詳細画面の「メモに追加」ボタン --- */
+/* 詳細画面のメモに追加ボタン */
 .detail-btns-right {
     display: flex;
     gap: 8px;
@@ -129,7 +141,7 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 }
 
 .memo-add-btn {
-    background: #8d6e63; /* こちらも茶色に変更 */
+    background: #8d6e63;
     color: white;
     border: none;
     padding: 8px 15px;
@@ -138,14 +150,53 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     font-weight: bold;
     font-size: 14px;
     transition: background 0.2s;
+    position: relative;
 }
 
-/* ホバー（マウスをのせた時）の色の変化 */
 .memo-trigger-btn:hover, .memo-add-btn:hover {
-    background: #6d4c41; /* 少し濃い茶色にして反応を出す */
+    background: #6d4c41;
 }
 
-/* 詳細画面の要素 */
+/* 通知バッジ（ヘッダー用） */
+.memo-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ff4d4d;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* チェックマーク：🛒の右上に小さく丸く浮かせる！ */
+.added-mark {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #2ecc71; /* 緑色 */
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    z-index: 5;
+    line-height: 1;
+}
+
+/* 詳細画面などの要素 */
 .counter-container { display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 10px 15px; border-radius: 10px; margin-bottom: 15px; }
 .counter-controls { display: flex; align-items: center; gap: 12px; }
 .count-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: #bdc3c7; color: white; font-size: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -161,7 +212,6 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .star-btn-large { font-size: 28px; color: #ccc; cursor: pointer; }
 .star-btn-large.active { color: #f1c40f; }
 
-/* 材料・手順等の装飾 */
 .ingredients-box { background: #fff5eb; padding: 15px; border-radius: 8px; margin: 15px 0; }
 .section-title-ing { color: #e67e22; display: block; margin-bottom: 5px; border-bottom: 1px dashed #e67e22; padding-bottom: 2px; }
 .seasoning-box { background: #eef9ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3498db; }
@@ -176,12 +226,11 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .pre-wrap { white-space: pre-wrap; line-height: 1.6; }
 .memo-box { background: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 15px; border-left: 4px solid #ccc; }
 
-/* --- ルーレット画面（3カラム・縦点線Ver） --- */
+/* --- ルーレット画面 --- */
 .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
 .roulette-card { background: white; width: 90%; max-width: 400px; padding: 25px 15px; border-radius: 15px; text-align: center; }
 .roulette-msg { font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #666; }
 
-/* カラムレイアウト */
 .roulette-options-container { 
     display: flex; 
     justify-content: space-between; 
@@ -189,6 +238,7 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     border: 1px solid #eee;
     border-radius: 10px;
     background: #fafafa;
+    color: #ffffff;
 }
 .opt-col { 
     flex: 1; 
@@ -197,34 +247,25 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
     gap: 8px; 
     padding: 10px 5px;
 }
-/* カラム間の縦点線 */
 .opt-col:not(:last-child) { border-right: 2px dotted #ccc; }
-
 .col-title { font-size: 12px; color: #999; font-weight: bold; margin-bottom: 5px; display: block; }
 
-/* チェックボックス付きラベル（チップ形式） */
 .opt-label {
     display: flex; align-items: center; justify-content: center; 
     padding: 6px 2px; border-radius: 6px; font-size: 13px; font-weight: bold;
     cursor: pointer; position: relative; min-height: 32px;
     transition: opacity 0.2s;
 }
-.opt-label input { display: none; } /* 本物のチェックボックスは隠す */
-
-/* チェックが入っていない時は半透明 */
+.opt-label input { display: none; }
 .opt-label:has(input:not(:checked)) { opacity: 0.3; filter: grayscale(0.5); }
 .opt-label:has(input:checked) { opacity: 1; filter: none; }
-
-/* お気に入り専用色 */
 .fav-opt { background: #f1c40f; color: white; }
 
-/* 結果表示 */
 .roulette-result-text { 
     font-size: 26px; font-weight: bold; margin: 30px 0; color: #e67e22; 
     min-height: 1.5em; display: flex; align-items: center; justify-content: center;
 }
 
-/* ボタン装飾 */
 .roulette-controls { display: flex; flex-direction: column; gap: 10px; }
 .roulette-run-btn {
     background: #e67e22; color: white; border: none; padding: 15px;
@@ -236,4 +277,3 @@ input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px
 .detail-go-btn { background: #27ae60; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
 .retry-btn { background: #3498db; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
 .close-text { color: #999; cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 15px; display: inline-block; }
-.roulette-options-container { color: #ffffff; }
